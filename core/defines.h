@@ -19,9 +19,9 @@
 
 #define DEL 127
 
-#define ERROR 1;
+#define ERROR 1
 
-#define OK 0;
+#define SUCCESS 0
 
 //! Maximum method length in HTTP/1.1
 #define METHODLEN 8
