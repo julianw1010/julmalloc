@@ -12,13 +12,13 @@
 #include "allocation/alloc_functions.h"
 #include "allocation/types.h"
 
-MemAddr start;
-
-void init();
-
 void *malloc_m(size_t size) {
-    init();
-    return start;
+
+    if(!size) {
+        return NULL;
+    }
+
+    return;
 }
 
 void free_m(void *ptr) {
@@ -26,17 +26,16 @@ void free_m(void *ptr) {
 }
 
 void *calloc_m(size_t nmemb, size_t size) {
+    if(!nmemb || !size) {
+        return NULL;
+    }
     return NULL;
 }
 
 void *realloc_m(void * ptr, size_t size) {
+    if(!size) {
+        free_m(ptr);
+        return ptr;
+    } 
     return NULL;
-}
-
-void init() {
-    start = sbrk(100);
-    if(sbrk(100) == (void *) -1) {
-        pr_error("sbrk error");
-        exit(1);
-    }
-}
+}    

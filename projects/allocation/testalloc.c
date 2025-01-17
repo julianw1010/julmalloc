@@ -11,5 +11,4 @@ int main(int argc, char *argv[]) {
     *number = 5;
     return 1;
 
-
 }

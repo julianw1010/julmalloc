@@ -5,10 +5,10 @@
 
 void *malloc_m(size_t size);
 
-void free(void *ptr);
+void free_m(void *ptr);
 
-void *calloc(size_t nmemb, size_t size);
+void *calloc_m(size_t nmemb, size_t size);
 
-void *realloc(void * ptr, size_t size);
+void *realloc_m(void *ptr, size_t size);
 
 #endif
