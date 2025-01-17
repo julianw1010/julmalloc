@@ -8,7 +8,7 @@
 
 int main(int argc, char *argv[]) {
     int *number = malloc_m(2);
-
+    *number = 5;
     return 1;
 
 
