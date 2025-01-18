@@ -57,8 +57,8 @@ int set_mem_value(mem_addr addr, nibble_value v) {
 }
 
 size_t is_valid_gap(mem_addr addr, size_t target) {
-    if(!is_gap_beginning(addr)) {
-        pr_error("Not beginning of gap");
+    if(read_map_value(addr)!= FREE) {
+        pr_error("Current map value not free");
         return 0;
     } else {
 
@@ -134,7 +134,7 @@ static map_addr get_map_addr(mem_addr addr) {
     return (g_map_start + ((uint8_t) floor((double) (addr - g_mem_start)/2)));
 }
 
-static bool is_gap_beginning(mem_addr addr) {
+/*static bool is_gap_beginning(mem_addr addr) {
     if(read_map_value(addr) != FREE) {
         pr_warning("Map value not FREE");
         return false;
@@ -148,4 +148,4 @@ static bool is_gap_beginning(mem_addr addr) {
         pr_info("Beginning of gap");
         return true;
     }
-}
+}*/
