@@ -7,19 +7,32 @@
 #include "core/defines.h"
 #include "alloc/methods.h"
 #include "alloc/tableopts.h"
+#include "alloc/defines.h"
 
 int main(int argc, char *argv[]) {
     init_table();
-    for (int i = 0; i<100; i++) {
-        int *number = calloc_custom(1, 2);
-        if(!number) {
+    int i = 1;
+    int *number1 = calloc_custom(1, sizeof(int));
+    while (i<100) {
+        int *number2 = calloc_custom(1, sizeof(int));
+        if(!number2) {
             pr_error("Could not alloc");
             pr_info("Successfully allocated %d numbers", i);
-            exit(EXIT_FAILURE);
+            //exit(EXIT_FAILURE);
+            break;
         }
-
-        pr_info("Integer number2: Address %p, value %d", (void *) number, *number);
+        pr_info("Integer number2: Address %p, value %d", (void *) number2, *number2);
+        i++;
     }
+
+    pr_info("First int addr: %p Mem start : %p", (void *) number1,  g_mem_start);
+    while (i>0) {
+        free_custom(g_mem_start+4*4);
+        pr_info("Freed number");
+        i--;
+    }
+
+    pr_info("Freed all entries");
 
     return 1;
 

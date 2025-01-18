@@ -44,7 +44,7 @@ void *malloc_custom(size_t size) {
 }
 
 void free_custom(void *addr) {
-    if(remove_map_entry((mem_addr) addr) == ERROR) {
+    if(remove_map_entry((mem_addr) addr)) {
         pr_error("FREE error. Aborting");
         exit(EXIT_FAILURE);
     }

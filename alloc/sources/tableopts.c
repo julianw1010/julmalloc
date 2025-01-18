@@ -87,7 +87,25 @@ mem_addr move_mem(mem_addr old, mem_addr new) {
     return NULL;
 }
 
-int remove_map_entry(mem_addr addr) {
-    return ERROR; 
+int remove_map_entry(mem_addr start) {
+    if(read_map_value(start)!= ALLOCD) {
+        pr_error("Not a beginning of a segment");
+        return ERROR;
+    }
+
+    if(set_map_value(start, 0x0)) {
+        pr_error("Could not set map value");
+    }
+
+    int i = 1;
+    while((uint8_t*)start+i<(uint8_t*)g_mem_end && read_map_value((uint8_t*)start+i)==CONSEC) {
+        if(set_map_value((uint8_t*)start+i, 0x0)) {
+            pr_error("Could not set map value");
+        }
+        i++;
+    }
+
+    pr_info("Cleared %d map entries", i);
+    return SUCCESS;
 }
 
