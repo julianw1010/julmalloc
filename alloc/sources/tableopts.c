@@ -20,7 +20,7 @@ void init_table() {
     g_map_start = (map_addr) sbrk(HEAP_SIZE);
     g_map_end = g_map_start+TABLE_SIZE;
     pr_info("g_map_start: %p g_map_end %p", g_map_start, g_map_end);
-    g_mem_start = g_map_start + TABLE_SIZE;
+    g_mem_start = g_map_end;
     g_mem_end = g_mem_start + STORAGE_SIZE;
     pr_info("g_mem_start: %p g_mem_end %p", g_mem_start, g_mem_end);
     if(g_map_start == (void *) -1) {
@@ -36,17 +36,25 @@ void init_table() {
             pr_error("Could not set map value");
         }
     }
-    pr_info("Initialized table to FREE all entries");
+    pr_info("Initialized table to FREE all entries \n");
 }
 
 mem_addr add_map_entry(mem_addr addr, size_t size) {
     pr_info("Addr %p size %zu", addr, size);
-    if(is_valid_gap(addr,size)<size) {
+    /*if(is_valid_gap(addr,size)<size) {
         pr_error("Gap too small");
         return NULL;
+    }*/
+ 
+    //  0x1  0xf  0xf  0xf...
+    // 7654 3210 7654 3210
+
+    if(set_map_value(addr, ALLOCD) == ERROR) {
+        pr_error("Could not set beginning of map area");
     }
-    for (size_t i = 0; i<size; i++) {
-        if(set_map_value(addr, ALLOCD) == ERROR) {
+
+    for (size_t i = 1; i<size; i++) {
+        if(set_map_value((addr+i), CONSEC) == ERROR) {
             pr_error("Could not set map value");
         }
     }

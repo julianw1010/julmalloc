@@ -25,11 +25,11 @@ void *malloc_custom(size_t size) {
 
     mem_addr new_a = g_alloc_function(size);
     if(!new_a) {
-        pr_error("g_alloc_function: %s", strerror(errno));
+        pr_error("g_alloc_function failed.");
         return NULL;
     }
 
-    pr_info("Found a gap at address %p", new_a);
+    pr_info("Found a gap at address %p\n", new_a);
 
     new_a = add_map_entry(new_a, size);
 
@@ -38,7 +38,7 @@ void *malloc_custom(size_t size) {
         return NULL;
     }
 
-    pr_info("Added map entry for address %p of size %zu", new_a, size);
+    pr_info("Added map entry for address %p of size %zu\n", new_a, size);
 
     return new_a;
 }

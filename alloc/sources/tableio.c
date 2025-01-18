@@ -98,7 +98,7 @@ static int set_nibble_value(map_addr addr, nibble_value n, bool low) {
     } else {
         to_write = (n << HIGH_NIBBLE_OFFSET) | (read_byte_value(addr) & LOW_NIBBLE);
     }
-    pr_info("Byte at %p is being overwritten with %d", addr, to_write);
+    pr_info("%s nibble at %p is being changed to %x. \n Total byte is being overwritten with %d", low ? "Lower" : "Higher", addr, n, to_write);
     set_byte_value(addr, to_write);
     return SUCCESS;
 }
@@ -114,7 +114,7 @@ static nibble_value read_nibble_value(map_addr addr, bool low) {
     } else {
         n = (HIGH_NIBBLE & read_byte_value(addr)) >> HIGH_NIBBLE_OFFSET;
     }
-    pr_info("Reading %s nibble %d at %p", low ? "High" : "Low", n, addr);
+    pr_info("Reading %s nibble %x at %p", low ? "Low" : "High", n, addr);
     return n;
 }
 

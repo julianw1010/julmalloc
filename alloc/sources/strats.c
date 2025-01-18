@@ -33,7 +33,7 @@ mem_addr first_fit(size_t size) {
         }
         iterator += gap_size;
     }
-    pr_warning("Reached end of loop without a gap found");
+    pr_warning("Reached end of loop without a gap found. Storage is full");
     return NULL;
 }
 
