@@ -49,12 +49,12 @@ mem_addr add_map_entry(mem_addr addr, size_t size) {
     //  0x1  0xf  0xf  0xf...
     // 7654 3210 7654 3210
 
-    if(set_map_value(addr, ALLOCD) == ERROR) {
+    if(set_map_value(addr, ALLOCD)) {
         pr_error("Could not set beginning of map area");
     }
 
     for (size_t i = 1; i<size; i++) {
-        if(set_map_value((addr+i), CONSEC) == ERROR) {
+        if(set_map_value((addr+i), CONSEC)) {
             pr_error("Could not set map value");
         }
     }
@@ -62,7 +62,25 @@ mem_addr add_map_entry(mem_addr addr, size_t size) {
 }
 
 mem_addr memset_zero(mem_addr start) {
-    return NULL;
+    if(read_map_value(start)!= ALLOCD) {
+        pr_error("Not a beginning of a segment");
+        return NULL;
+    }
+
+    if(set_mem_value(start, 0x0)) {
+        pr_error("Could not set mem value");
+    }
+
+    int i = 1;
+    while(start+i<g_mem_end && read_map_value(start+i)==CONSEC) {
+        if(set_mem_value(start+i, 0x0)) {
+            pr_error("Could not set mem value");
+        }
+        i++;
+    }
+
+    pr_info("Zeroed %d memory bytes", i);
+    return start;
 }
 
 mem_addr move_mem(mem_addr old, mem_addr new) {

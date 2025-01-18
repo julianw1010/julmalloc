@@ -34,7 +34,7 @@ int set_map_value(mem_addr addr, nibble_value v) {
     return set_nibble_value(map_addr, v, low);
 }
 
-nibble_value read_map_value(mem_addr addr) {
+byte_value read_map_value(mem_addr addr) {
     if(!is_mem_addr(addr)) {
         pr_error("Invalid address %p, Addr-Beg: %p End %p", addr, g_mem_start, g_mem_end);
         return ERROR;
@@ -46,12 +46,13 @@ nibble_value read_map_value(mem_addr addr) {
     return read_nibble_value(map_addr, low);
 }
 
-int set_mem_value(mem_addr addr, nibble_value v) {
+int set_mem_value(mem_addr addr, byte_value v) {
     if(!is_mem_addr(addr)) {
         pr_error("Invalid address");
         return ERROR;
     }
 
+    pr_info("Byte at %p is being changed to %d", addr, v);
     set_byte_value(addr, v);
     return SUCCESS;
 }

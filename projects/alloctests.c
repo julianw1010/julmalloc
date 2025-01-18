@@ -11,13 +11,12 @@
 int main(int argc, char *argv[]) {
     init_table();
     for (int i = 0; i<100; i++) {
-        int *number = malloc_custom(2);
+        int *number = calloc_custom(1, 2);
         if(!number) {
             pr_error("Could not alloc");
             pr_info("Successfully allocated %d numbers", i);
             exit(EXIT_FAILURE);
         }
-        *number = i;
 
         pr_info("Integer number2: Address %p, value %d", (void *) number, *number);
     }
