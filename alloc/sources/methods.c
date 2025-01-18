@@ -84,7 +84,7 @@ void *realloc(void *ptr, size_t new_size) {
         return NULL;
     }
 
-    new_a = move_mem(ptr, new_a, new_site);
+    new_a = move_mem(ptr, new_a, new_size);
     if(!new_a) {
         pr_error("Could not move memory");
         return NULL;
