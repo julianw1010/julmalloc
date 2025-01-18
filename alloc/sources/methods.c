@@ -29,12 +29,17 @@ void *malloc_custom(size_t size) {
         return NULL;
     }
 
+    pr_info("Found a gap at address %p", new_a);
+
     new_a = add_map_entry(new_a, size);
 
     if(!new_a) {
         pr_error("add_map_entry");
         return NULL;
     }
+
+    pr_info("Added map entry for address %p of size %zu", new_a, size);
+
     return new_a;
 }
 

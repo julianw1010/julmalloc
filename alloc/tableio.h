@@ -9,6 +9,6 @@ nibble_value read_map_value(mem_addr addr);
 
 int set_mem_entry(mem_addr addr, byte_value v);
 
-size_t get_gap_size(map_addr addr);
+bool is_valid_gap(map_addr addr, size_t target);
 
 #endif

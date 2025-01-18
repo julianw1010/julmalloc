@@ -16,7 +16,7 @@ static nibble_value read_nibble_value(mem_addr addr, bool low);
 
 static int is_map_addr(map_addr addr);
 
-static mem_addr get_mem_addr(map_addr addr, bool low);
+//static mem_addr get_mem_addr(map_addr addr, bool low);
 
 static map_addr get_map_addr(mem_addr addr);
 
@@ -56,16 +56,18 @@ int set_mem_value(mem_addr addr, nibble_value v) {
     return SUCCESS;
 }
 
-size_t get_gap_size(mem_addr addr) {
+size_t is_valid_gap(mem_addr addr, size_t target) {
     if(!is_gap_beginning(addr)) {
         pr_error("Not beginning of gap");
         return 0;
     } else {
-        mem_addr iterator = addr;
-        while(iterator < g_mem_end && read_map_value(iterator) == FREE) {
-            iterator++;
+
+        for(size_t i = 0 ; i<target ; i++) {
+            if((addr + i) >= g_mem_end || read_map_value(addr + i) != FREE) {
+                return i;
+            }
         }
-        return (size_t) (iterator - addr);
+        return target;
     }
 }
 
@@ -90,14 +92,14 @@ static int set_nibble_value(map_addr addr, nibble_value n, bool low) {
         pr_error("Invalid address %p, Addr-Beg: %p End %p", addr, g_map_start, g_map_end);
         return ERROR;
     }
-    uint8_t mask;
+    uint8_t to_write;
     if(low) {
-        mask = ~LOW_NIBBLE | (n << LOW_NIBBLE_OFFSET);
+        to_write = (n << LOW_NIBBLE_OFFSET) | (read_byte_value(addr) & HIGH_NIBBLE);
     } else {
-        mask = ~HIGH_NIBBLE | (n << HIGH_NIBBLE_OFFSET);
+        to_write = (n << HIGH_NIBBLE_OFFSET) | (read_byte_value(addr) & LOW_NIBBLE);
     }
-
-    set_byte_value(addr, read_byte_value(addr) & mask);
+    pr_info("Byte at %p is being overwritten with %d", addr, to_write);
+    set_byte_value(addr, to_write);
     return SUCCESS;
 }
 
@@ -112,6 +114,7 @@ static nibble_value read_nibble_value(map_addr addr, bool low) {
     } else {
         n = (HIGH_NIBBLE & read_byte_value(addr)) >> HIGH_NIBBLE_OFFSET;
     }
+    pr_info("Reading %s nibble %d at %p", low ? "High" : "Low", n, addr);
     return n;
 }
 

@@ -41,7 +41,7 @@ void init_table() {
 
 mem_addr add_map_entry(mem_addr addr, size_t size) {
     pr_info("Addr %p size %zu", addr, size);
-    if(get_gap_size(addr)<size) {
+    if(is_valid_gap(addr,size)<size) {
         pr_error("Gap too small");
         return NULL;
     }
