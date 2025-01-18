@@ -47,8 +47,8 @@ void free(void *ptr) {
     if(!ptr) {
         return;
     }
-    pr_info("%p", (uint8_t *) addr);
-    if(remove_map_entry((mem_addr) addr)) {
+    pr_info("%p", (uint8_t *) ptr);
+    if(remove_map_entry((mem_addr) ptr)) {
         pr_error("FREE error. Aborting");
         exit(EXIT_FAILURE);
     }
@@ -60,7 +60,7 @@ void *calloc(size_t n_memb, size_t size) {
         return NULL;
     }
 
-    mem_addr new_a = (mem_addr) malloc_custom(n_memb*size);
+    mem_addr new_a = (mem_addr) malloc(n_memb*size);
 
     if(!new_a) {
         pr_error("Malloc error %s", strerror(errno));
@@ -73,7 +73,7 @@ void *calloc(size_t n_memb, size_t size) {
 void *realloc(void *ptr, size_t new_size) {
     if(!new_size) {
         pr_warning("size zero. Realloc acts like free");
-        free_custom(ptr);
+        free(ptr);
         return NULL;
     } 
 
@@ -84,7 +84,7 @@ void *realloc(void *ptr, size_t new_size) {
         return NULL;
     }
 
-    new_a = move_mem(ptr, new_a, new_size);
+    new_a = move_mem(ptr, new_a);
     if(!new_a) {
         pr_error("Could not move memory");
         return NULL;

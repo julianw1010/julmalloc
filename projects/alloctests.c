@@ -12,9 +12,9 @@
 int main(int argc, char *argv[]) {
     init_table();
     int i = 1;
-    int *number1 = calloc_custom(1, sizeof(int));
+    int *number1 = calloc(1, sizeof(int));
     while (i<100) {
-        int *number2 = calloc_custom(1, sizeof(int));
+        int *number2 = calloc(1, sizeof(int));
         if(!number2) {
             pr_error("Could not alloc");
             pr_info("Successfully allocated %d numbers", i);
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 
     pr_info("First int addr: %p Mem start : %p", (void *) number1,  g_mem_start);
     while (i>0) {
-        free_custom(g_mem_start+(i-1)*sizeof(int));
+        free(g_mem_start+(i-1)*sizeof(int));
         pr_info("Freed number");
         i--;
     }
