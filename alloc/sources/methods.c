@@ -43,7 +43,8 @@ void *malloc_custom(size_t size) {
     return new_a;
 }
 
-void free_custom(void *addr) {
+void free_custom(mem_addr *addr) {
+    pr_info("%p", (uint8_t *) addr);
     if(remove_map_entry((mem_addr) addr)) {
         pr_error("FREE error. Aborting");
         exit(EXIT_FAILURE);

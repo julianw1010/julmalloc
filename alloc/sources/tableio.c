@@ -20,7 +20,7 @@ static int is_map_addr(map_addr addr);
 
 static map_addr get_map_addr(mem_addr addr);
 
-static bool is_gap_beginning(mem_addr addr);
+//static bool is_gap_beginning(mem_addr addr);
 
 int set_map_value(mem_addr addr, nibble_value v) {
     if(!is_mem_addr(addr)) {
