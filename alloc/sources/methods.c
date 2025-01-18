@@ -16,7 +16,7 @@
 
 #include "alloc/tableopts.h"
 
-void *malloc_custom(size_t size) {
+void *malloc(size_t size) {
 
     if(!size) {
         pr_warning("Size zero");
@@ -43,7 +43,10 @@ void *malloc_custom(size_t size) {
     return new_a;
 }
 
-void free_custom(mem_addr *addr) {
+void free(void *ptr) {
+    if(!ptr) {
+        return;
+    }
     pr_info("%p", (uint8_t *) addr);
     if(remove_map_entry((mem_addr) addr)) {
         pr_error("FREE error. Aborting");
@@ -51,7 +54,7 @@ void free_custom(mem_addr *addr) {
     }
 }
 
-void *calloc_custom(size_t n_memb, size_t size) {
+void *calloc(size_t n_memb, size_t size) {
     if(!n_memb || !size) {
         pr_warning("Product of input is zero. No alloc");
         return NULL;
@@ -67,21 +70,21 @@ void *calloc_custom(size_t n_memb, size_t size) {
     return (void *) memset_zero(new_a);
 }
 
-void *realloc_custom(void *old_a, size_t size) {
-    if(!size) {
+void *realloc(void *ptr, size_t new_size) {
+    if(!new_size) {
         pr_warning("size zero. Realloc acts like free");
-        free_custom(old_a);
+        free_custom(ptr);
         return NULL;
     } 
 
-    mem_addr new_a = g_alloc_function(size);
+    mem_addr new_a = g_alloc_function(new_size);
 
     if(!new_a) {
         pr_error("Realloc failed");
         return NULL;
     }
 
-    new_a = move_mem(old_a, new_a);
+    new_a = move_mem(ptr, new_a, new_site);
     if(!new_a) {
         pr_error("Could not move memory");
         return NULL;

@@ -3,12 +3,12 @@
 
 #include <stddef.h>
 
-void *malloc_custom(size_t size);
+void *malloc(size_t size);
 
-void free_custom(void *addr);
+void free(void *ptr);
 
-void *calloc_custom(size_t n_memb, size_t size);
+void *calloc(size_t n_memb, size_t size);
 
-void *realloc_custom(void *old_a, size_t size);
+void *realloc(void *ptr, size_t size);
 
 #endif
