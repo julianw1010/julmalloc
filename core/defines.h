@@ -19,7 +19,7 @@
 
 #define DEL 127
 
-#define ERROR 1
+#define ERROR -1
 
 #define SUCCESS 0
 
@@ -94,17 +94,17 @@
 #define ANSI_BLUE "\x1b[0;34m"
 //! Various output macros
 #define pr_error(format, ...)                                                  \
-    (fprintf(stderr, ANSI_RED "[ERROR] (%s:%d) %s:" format ANSI_RESET,      \
+    (fprintf(stderr, ANSI_RED "[ERROR] (%s:%d) %s:" format ANSI_RESET "\n",      \
              __FILE__, __LINE__, __func__ __VA_OPT__(, ) __VA_ARGS__))
 #ifdef NDEBUG
 #define pr_warning(format, ...) ((void)0)
 #define pr_info(format, ...) ((void)0)
 #else
 #define pr_warning(format, ...)                                                \
-    (fprintf(stderr, ANSI_YELLOW "[WARN] (%s:%d) %s:" format ANSI_RESET,    \
+    (fprintf(stderr, ANSI_YELLOW "[WARN] (%s:%d) %s:" format ANSI_RESET "\n",    \
              __FILE__, __LINE__, __func__ __VA_OPT__(, ) __VA_ARGS__))
 #define pr_info(format, ...)                                                   \
-    (fprintf(stderr, ANSI_GREEN "[INFO] (%s:%d) %s:" format ANSI_RESET,     \
+    (fprintf(stderr, ANSI_GREEN "[INFO] (%s:%d) %s:" format ANSI_RESET "\n",     \
              __FILE__, __LINE__, __func__ __VA_OPT__(, ) __VA_ARGS__))
 #endif
 

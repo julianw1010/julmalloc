@@ -24,6 +24,7 @@ static bool is_gap_beginning(mem_addr addr);
 
 int set_map_value(mem_addr addr, nibble_value v) {
     if(!is_mem_addr(addr)) {
+        pr_error("Invalid address");
         return ERROR;
     }
 
@@ -35,6 +36,7 @@ int set_map_value(mem_addr addr, nibble_value v) {
 
 nibble_value read_map_value(mem_addr addr) {
     if(!is_mem_addr(addr)) {
+        pr_error("Invalid address %p, Addr-Beg: %p End %p", addr, g_mem_start, g_mem_end);
         return ERROR;
     }
     
@@ -46,6 +48,7 @@ nibble_value read_map_value(mem_addr addr) {
 
 int set_mem_value(mem_addr addr, nibble_value v) {
     if(!is_mem_addr(addr)) {
+        pr_error("Invalid address");
         return ERROR;
     }
 
@@ -55,6 +58,7 @@ int set_mem_value(mem_addr addr, nibble_value v) {
 
 size_t get_gap_size(mem_addr addr) {
     if(!is_gap_beginning(addr)) {
+        pr_error("Not beginning of gap");
         return 0;
     } else {
         mem_addr iterator = addr;
@@ -74,7 +78,7 @@ static int is_low(mem_addr addr) {
 }
 
 static int is_mem_addr(mem_addr addr) {
-    return (addr>=g_mem_start && addr < g_mem_end);
+    return ((addr>=g_mem_start) && (addr < g_mem_end));
 }
 
 static int is_map_addr(map_addr addr) {
@@ -83,6 +87,7 @@ static int is_map_addr(map_addr addr) {
 
 static int set_nibble_value(map_addr addr, nibble_value n, bool low) {
     if(!is_map_addr(addr)) {
+        pr_error("Invalid address %p, Addr-Beg: %p End %p", addr, g_map_start, g_map_end);
         return ERROR;
     }
     uint8_t mask;
@@ -96,8 +101,9 @@ static int set_nibble_value(map_addr addr, nibble_value n, bool low) {
     return SUCCESS;
 }
 
-static nibble_value read_nibble_value(mem_addr addr, bool low) {
-    if(!is_mem_addr(addr)) {
+static nibble_value read_nibble_value(map_addr addr, bool low) {
+    if(!is_map_addr(addr)) {
+        pr_error("Invalid address %p, Addr-Beg: %p End %p", addr, g_map_start, g_map_end);
         return ERROR;
     }
     nibble_value n;
@@ -109,13 +115,13 @@ static nibble_value read_nibble_value(mem_addr addr, bool low) {
     return n;
 }
 
-static mem_addr get_mem_addr(map_addr addr, bool low) {
+/*static mem_addr get_mem_addr(map_addr addr, bool low) {
     if(!is_map_addr(addr)) {
         pr_error("Not a map_addr");
         return NULL;
     }
     return (g_mem_start + (uint8_t)(addr-g_map_start)*2+low);
-}
+}*/
 
 static map_addr get_map_addr(mem_addr addr) {
     if(!is_mem_addr(addr)) {
@@ -127,12 +133,16 @@ static map_addr get_map_addr(mem_addr addr) {
 
 static bool is_gap_beginning(mem_addr addr) {
     if(read_map_value(addr) != FREE) {
+        pr_warning("Map value not FREE");
         return false;
     } else if(addr == g_mem_start) {
+        pr_info("Addr is beginning of space");
         return true;
-    } else if(read_map_value(addr) == FREE) {
+    } else if(read_map_value(addr-1) == FREE) {
+        pr_info("Not beginning of GAP");
         return false;
     } else {
+        pr_info("Beginning of gap");
         return true;
     }
 }

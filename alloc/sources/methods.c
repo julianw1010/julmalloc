@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <string.h>
 
 #include "core/defines.h"
 #include "alloc/types.h"
@@ -17,15 +19,23 @@
 void *malloc_custom(size_t size) {
 
     if(!size) {
+        pr_warning("Size zero");
         return NULL;
     }
 
     mem_addr new_a = g_alloc_function(size);
     if(!new_a) {
+        pr_error("g_alloc_function: %s", strerror(errno));
         return NULL;
     }
 
-    return (void *) add_map_entry(new_a, size);
+    new_a = add_map_entry(new_a, size);
+
+    if(!new_a) {
+        pr_error("add_map_entry");
+        return NULL;
+    }
+    return new_a;
 }
 
 void free_custom(void *addr) {
@@ -37,12 +47,14 @@ void free_custom(void *addr) {
 
 void *calloc_custom(size_t n_memb, size_t size) {
     if(!n_memb || !size) {
+        pr_warning("Product of input is zero. No alloc");
         return NULL;
     }
 
-    mem_addr new_a = malloc_custom(n_memb*size);
+    mem_addr new_a = (mem_addr) malloc_custom(n_memb*size);
 
     if(!new_a) {
+        pr_error("Malloc error %s", strerror(errno));
         return NULL;
     }
 
@@ -51,11 +63,22 @@ void *calloc_custom(size_t n_memb, size_t size) {
 
 void *realloc_custom(void *old_a, size_t size) {
     if(!size) {
+        pr_warning("size zero. Realloc acts like free");
         free_custom(old_a);
         return NULL;
     } 
 
     mem_addr new_a = g_alloc_function(size);
 
-    return (void *) move_mem(old_a, new_a);    
+    if(!new_a) {
+        pr_error("Realloc failed");
+        return NULL;
+    }
+
+    new_a = move_mem(old_a, new_a);
+    if(!new_a) {
+        pr_error("Could not move memory");
+        return NULL;
+    }    
+    return (void *) new_a;
 }    

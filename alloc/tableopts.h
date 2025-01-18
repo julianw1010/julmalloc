@@ -7,7 +7,7 @@ void init_table();
 
 mem_addr add_map_entry(mem_addr addr, size_t size);
 
-nibble_value remove_map_entry(mem_addr addr);
+int remove_map_entry(mem_addr addr);
 
 mem_addr memset_zero(mem_addr start);
 
