@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.28.2)
-project(julmalloc C)
+
+project(julmalloc LANGUAGES C VERSION 1.0.0 DESCRIPTION "julmalloc")
 
 add_compile_options(-Wall -Wextra -Wpedantic -std=gnu23 -lm)
 include(CTest)
