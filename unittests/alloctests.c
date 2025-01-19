@@ -33,6 +33,6 @@ int main(int argc, char *argv[]) {
 
     pr_info("Freed all entries");
 
-    return 1;
+    return EXIT_SUCCESS;
 
 }
