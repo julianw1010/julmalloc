@@ -1,3 +1,5 @@
+add_compile_options(-fPIC)
+
 add_library(storage sources/storage.c)
 add_library(methods sources/methods.c)
 add_library(strats sources/strats.c)

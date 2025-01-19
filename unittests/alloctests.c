@@ -5,12 +5,11 @@
 #include <stdlib.h>
 
 #include "core/defines.h"
-#include "alloc/methods.h"
-#include "alloc/tableopts.h"
 #include "alloc/defines.h"
 
+#include "alloc/tableopts.h"
+
 int main(int argc, char *argv[]) {
-    init_table();
     int i = 1;
     int *number1 = calloc(1, sizeof(int));
     while (i<100) {

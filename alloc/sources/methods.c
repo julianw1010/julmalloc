@@ -16,7 +16,13 @@
 
 #include "alloc/tableopts.h"
 
+bool table_inited = false;
+
 void *malloc(size_t size) {
+    if(!table_inited) {
+        init_table();
+        table_inited = true;
+    }
 
     if(!size) {
         pr_warning("Size zero");
@@ -44,6 +50,11 @@ void *malloc(size_t size) {
 }
 
 void free(void *ptr) {
+    if(!table_inited) {
+        init_table();
+        table_inited = true;
+    }
+
     if(!ptr) {
         return;
     }
@@ -55,6 +66,12 @@ void free(void *ptr) {
 }
 
 void *calloc(size_t n_memb, size_t size) {
+
+    if(!table_inited) {
+        init_table();
+        table_inited = true;
+    }
+
     if(!n_memb || !size) {
         pr_warning("Product of input is zero. No alloc");
         return NULL;
@@ -71,6 +88,12 @@ void *calloc(size_t n_memb, size_t size) {
 }
 
 void *realloc(void *ptr, size_t new_size) {
+
+    if(!table_inited) {
+        init_table();
+        table_inited = true;
+    }
+
     if(!new_size) {
         pr_warning("size zero. Realloc acts like free");
         free(ptr);

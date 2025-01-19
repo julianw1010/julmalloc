@@ -14,7 +14,7 @@ extern mem_addr g_mem_start;
 extern mem_addr g_mem_end;
 extern alloc_function g_alloc_function;
 
-#define HEAP_SIZE (size_t) 100
+#define HEAP_SIZE (size_t) 1000
 #define TABLE_SIZE (size_t) floor(((double)1/3)*(HEAP_SIZE))
 #define STORAGE_SIZE 2*TABLE_SIZE
 
