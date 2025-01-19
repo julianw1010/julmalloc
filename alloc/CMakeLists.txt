@@ -1,12 +1,5 @@
 add_compile_options(-fPIC)
 
-add_library(storage sources/storage.c)
-add_library(methods sources/methods.c)
-add_library(strats sources/strats.c)
-add_library(tableio sources/tableio.c)
-add_library(tableopts sources/tableopts.c)
+add_library(alloc sources/storage.c sources/methods.c sources/strats.c sources/tableio.c sources/tableopts.c)
 
-target_link_libraries(tableio storage m)
-target_link_libraries(tableopts tableio)
-target_link_libraries(tableopts strats)
-target_link_libraries(methods tableopts)
+target_link_libraries(alloc m)

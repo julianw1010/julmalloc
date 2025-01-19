@@ -8,7 +8,7 @@ add_subdirectory(alloc)
 add_subdirectory(unittests)
 
 add_executable(alloctests unittests/alloctests.c)
-target_link_libraries(alloctests tableopts)
+target_link_libraries(alloctests alloc)
 
 add_test(NAME alloctests COMMAND alloctests)
 set_property(TEST alloctests
