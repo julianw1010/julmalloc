@@ -16,7 +16,7 @@
 
 #include "alloc/tableopts.h"
 
-bool table_inited = false;
+static bool table_inited = false;
 
 void *malloc(size_t size) {
     if(!table_inited) {
