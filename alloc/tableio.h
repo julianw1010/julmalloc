@@ -15,4 +15,6 @@ bool is_gap_beginning (uint8_t *addr);
 
 bool is_segment_beginning (uint8_t *addr);
 
+size_t get_segment_size (uint8_t *addr);
+
 #endif

@@ -12,6 +12,7 @@
 #include "alloc/types.h"
 #include "core/defines.h"
 
+#include "alloc/tableio.h"
 #include "alloc/tableopts.h"
 
 static bool table_inited = false;
@@ -116,6 +117,13 @@ realloc (void *ptr, size_t size)
             pr_warning ("size zero. Realloc acts like free");
             free (ptr);
             return nullptr;
+        }
+    size_t segment_size = get_segment_size (ptr);
+
+    if (segment_size == 0)
+        {
+            pr_warning ("Invalid pointer");
+            return NULL;
         }
 
     uint8_t *new_a = g_alloc_function (size);

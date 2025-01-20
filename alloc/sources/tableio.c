@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -198,4 +199,20 @@ bool
 is_segment_beginning (uint8_t *addr)
 {
     return read_map_value (addr) == ALLOCD;
+}
+
+size_t
+get_segment_size (uint8_t *addr)
+{
+    if (!is_segment_beginning (addr))
+        {
+            pr_error ("Invalid arguments");
+            return 0;
+        }
+    int i = 1;
+    while (read_map_value (addr + i) == CONSEC)
+        {
+            i++;
+        }
+    return i;
 }
