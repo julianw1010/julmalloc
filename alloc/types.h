@@ -5,15 +5,9 @@
 #include <stdint.h>
 
 //! Function pointer to allocator function being used
-typedef uint8_t *(*alloc_function) (size_t);
+typedef uint8_t *(*alloc_function)(size_t);
 
 //! Enum describing allocation strategies
-typedef enum
-{
-    FIRST_FIT,
-    NEXT_FIT,
-    BEST_FIT,
-    WORST_FIT
-} alloc_strat_e;
+typedef enum { FIRST_FIT, NEXT_FIT, BEST_FIT, WORST_FIT } alloc_strat_e;
 
 #endif
