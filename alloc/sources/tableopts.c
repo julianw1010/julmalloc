@@ -151,6 +151,7 @@ size_t get_heap_used_space() {
         if (read_map_value(g_mem_start + i) != UNALLLOCATED) {
             size++;
         }
+        i++;
     }
     return size;
 }
