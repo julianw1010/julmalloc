@@ -12,10 +12,6 @@
 
 static bool is_low (const uint8_t *addr);
 
-static bool is_map_addr (const uint8_t *addr);
-
-static bool is_mem_addr (const uint8_t *addr);
-
 static uint8_t *get_map_addr (uint8_t *addr);
 
 static int set_value (uint8_t *addr, uint8_t n, bool low);
@@ -92,13 +88,13 @@ is_low (const uint8_t *addr)
     return (bool)((addr - g_mem_start) % 2);
 }
 
-static bool
+bool
 is_mem_addr (const uint8_t *addr)
 {
     return (bool)((addr >= g_mem_start) && (addr < g_mem_end));
 }
 
-static bool
+bool
 is_map_addr (const uint8_t *addr)
 {
     return (bool)(addr >= g_map_start && addr < g_map_end);

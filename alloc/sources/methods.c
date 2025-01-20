@@ -134,7 +134,7 @@ realloc (void *ptr, size_t size)
             return nullptr;
         }
 
-    new_a = move_mem (ptr, new_a);
+    new_a = move_mem (ptr, new_a, segment_size);
     if (!new_a)
         {
             pr_error ("Could not move memory");

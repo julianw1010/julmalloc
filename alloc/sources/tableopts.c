@@ -105,9 +105,32 @@ memset_zero (uint8_t *start)
 }
 
 uint8_t *
-move_mem (uint8_t *old, uint8_t *new)
+move_mem (uint8_t *old, uint8_t *new, size_t segment_size)
 {
-    return nullptr;
+    if (!old | !new)
+        {
+            pr_error ("Invalid pointers");
+            return nullptr;
+        }
+
+    if (!is_mem_addr (old) || !is_mem_addr (new))
+        {
+            pr_error ("Adress out of bounds");
+            return nullptr;
+        }
+    size_t i = 0;
+    while (i < segment_size)
+        {
+            if (old + i >= g_mem_end)
+                {
+                    pr_error ("Memory access violation");
+                    return NULL;
+                }
+            set_mem_value (new + i, read_map_value (old + i));
+            i++;
+        }
+
+    return new;
 }
 
 int
