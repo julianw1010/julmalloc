@@ -34,7 +34,7 @@ first_fit (size_t size)
                 }
 
             pr_info ("Map entry at %p is FREE", iterator);
-            size_t gap_size = is_valid_gap (iterator, size);
+            size_t gap_size = get_gap_size (iterator, size);
             if (gap_size >= size)
                 {
                     pr_info ("Found gap at %p of size %zu", iterator, size);

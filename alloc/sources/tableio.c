@@ -12,14 +12,14 @@
 
 static bool is_low (const uint8_t *addr);
 
-static uint8_t *get_map_addr (uint8_t *addr);
+static uint8_t *get_map_addr (const uint8_t *addr);
 
 static int set_value (uint8_t *addr, uint8_t n, bool low);
 
-static uint8_t read_value (uint8_t *addr, bool low);
+static uint8_t read_value (const uint8_t *addr, bool low);
 
 int
-set_map_value (uint8_t *addr, uint8_t v)
+set_map_value (const uint8_t *addr, uint8_t v)
 {
     if (!is_mem_addr (addr))
         {
@@ -34,13 +34,13 @@ set_map_value (uint8_t *addr, uint8_t v)
 }
 
 uint8_t
-read_map_value (uint8_t *addr)
+read_map_value (const uint8_t *addr)
 {
     if (!is_mem_addr (addr))
         {
             pr_error ("Invalid address %p, Addr-Beg: %p End %p", addr,
                       g_mem_start, g_mem_end);
-            return ERROR;
+            exit (EXIT_FAILURE);
         }
 
     uint8_t *mapaddr = get_map_addr (addr);
@@ -64,7 +64,7 @@ set_mem_value (uint8_t *addr, uint8_t v)
 }
 
 size_t
-is_valid_gap (uint8_t *addr, size_t target)
+get_gap_size (const uint8_t *addr, size_t target)
 {
     if (!is_gap_beginning (addr))
         {
@@ -128,13 +128,13 @@ set_value (uint8_t *addr, uint8_t n, bool low)
 }
 
 static uint8_t
-read_value (uint8_t *addr, bool low)
+read_value (const uint8_t *addr, bool low)
 {
     if (!is_map_addr (addr))
         {
             pr_error ("Invalid address %p, Addr-Beg: %p End %p", addr,
                       g_map_start, g_map_end);
-            return ERROR;
+            exit (EXIT_FAILURE);
         }
     uint8_t n = 0;
     if (low)
@@ -149,16 +149,8 @@ read_value (uint8_t *addr, bool low)
     return n;
 }
 
-/*staticuint8_t* get_map_addr*(uint8_t* addr, bool low) {
-    if(!is_map_addr*(addr)) {
-        pr_error("Not auint8_t*");
-        return nullptr;
-    }
-    return (g_mem_start + (uint8_t)(addr-g_map_start)*2+low);
-}*/
-
 static uint8_t *
-get_map_addr (uint8_t *addr)
+get_map_addr (const uint8_t *addr)
 {
     if (!is_mem_addr (addr))
         {
@@ -169,7 +161,7 @@ get_map_addr (uint8_t *addr)
 }
 
 bool
-is_gap_beginning (uint8_t *addr)
+is_gap_beginning (const uint8_t *addr)
 {
     if (read_map_value (addr) != FREE)
         {
@@ -192,13 +184,13 @@ is_gap_beginning (uint8_t *addr)
 }
 
 bool
-is_segment_beginning (uint8_t *addr)
+is_segment_beginning (const uint8_t *addr)
 {
     return read_map_value (addr) == ALLOCD;
 }
 
 size_t
-get_segment_size (uint8_t *addr)
+get_segment_size (const uint8_t *addr)
 {
     if (!is_segment_beginning (addr))
         {
@@ -206,9 +198,17 @@ get_segment_size (uint8_t *addr)
             return 0;
         }
     int i = 1;
-    while (read_map_value (addr + i) == CONSEC)
+    while (addr <= g_mem_end && read_map_value (addr + i) == CONSEC)
         {
             i++;
         }
     return i;
 }
+
+/*staticuint8_t* get_map_addr*(uint8_t* addr, bool low) {
+    if(!is_map_addr*(addr)) {
+        pr_error("Not auint8_t*");
+        return nullptr;
+    }
+    return (g_mem_start + (uint8_t)(addr-g_map_start)*2+low);
+}*/

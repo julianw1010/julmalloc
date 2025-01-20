@@ -45,15 +45,15 @@ init_table ()
     pr_info ("Initialized table to FREE all entries \n");
 }
 
-uint8_t *
-add_map_entry (uint8_t *addr, size_t size)
+int
+add_map_entry (const uint8_t *addr, size_t size)
 {
     pr_info ("Addr %p size %zu", addr, size);
 
-    if (is_valid_gap (addr, size) < size)
+    if (get_gap_size (addr, size) < size)
         {
             pr_error ("Gap too small");
-            return nullptr;
+            return ERROR;
         }
 
     //  0x1  0xf  0xf  0xf...
@@ -71,28 +71,33 @@ add_map_entry (uint8_t *addr, size_t size)
                     pr_error ("Could not set map value");
                 }
         }
-    return addr;
+    return SUCCESS;
 }
 
-uint8_t *
+int
 memset_zero (uint8_t *start)
 {
     if (!is_segment_beginning (start))
         {
             pr_error ("Invalid parameters. start doesn't point to the "
                       "beginning of allocated space");
-            return nullptr;
+            return ERROR;
         }
 
     if (set_mem_value (start, FREE))
         {
             pr_error ("Could not set mem value");
-            return nullptr;
+            return ERROR;
         }
 
     int i = 1;
-    while (start + i < g_mem_end && read_map_value (start + i) == CONSEC)
+    while (read_map_value (start + i) == CONSEC)
         {
+            if (start + i >= g_mem_end)
+                {
+                    pr_error ("Memory access violation");
+                    return ERROR;
+                }
             if (set_mem_value (start + i, FREE))
                 {
                     pr_error ("Could not set mem value");
@@ -101,22 +106,27 @@ memset_zero (uint8_t *start)
         }
 
     pr_info ("Zeroed %d memory bytes", i);
-    return start;
+    return SUCCESS;
 }
 
-uint8_t *
+int
 move_mem (uint8_t *old, uint8_t *new, size_t segment_size)
 {
     if (!old | !new)
         {
             pr_error ("Invalid pointers");
-            return nullptr;
+            return ERROR;
         }
 
     if (!is_mem_addr (old) || !is_mem_addr (new))
         {
             pr_error ("Adress out of bounds");
-            return nullptr;
+            return ERROR;
+        }
+    if (old == new)
+        {
+            pr_info ("Nothing to do");
+            return SUCCESS;
         }
     size_t i = 0;
     while (i < segment_size)
@@ -124,17 +134,21 @@ move_mem (uint8_t *old, uint8_t *new, size_t segment_size)
             if (old + i >= g_mem_end)
                 {
                     pr_error ("Memory access violation");
-                    return NULL;
+                    return ERROR;
                 }
-            set_mem_value (new + i, read_map_value (old + i));
+            if (set_mem_value (new + i, read_map_value (old + i)) == ERROR)
+                {
+                    pr_error ("Write error ");
+                    return ERROR;
+                }
             i++;
         }
 
-    return new;
+    return SUCCESS;
 }
 
 int
-remove_map_entry (uint8_t *start)
+remove_map_entry (const uint8_t *start)
 {
     if (read_map_value (start) != ALLOCD)
         {

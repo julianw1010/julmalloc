@@ -41,9 +41,9 @@ malloc (size_t size)
 
     pr_info ("Found a gap at address %p\n", new_a);
 
-    new_a = add_map_entry (new_a, size);
+    int status = add_map_entry (new_a, size);
 
-    if (!new_a)
+    if (status == ERROR)
         {
             pr_error ("add_map_entry");
             return nullptr;
@@ -68,7 +68,8 @@ free (void *ptr)
             return;
         }
     pr_info ("%p", (uint8_t *)ptr);
-    if (remove_map_entry ((uint8_t *)ptr))
+    int status = remove_map_entry ((uint8_t *)ptr);
+    if (status == ERROR)
         {
             pr_error ("FREE error. Aborting");
             exit (EXIT_FAILURE);
@@ -99,7 +100,14 @@ calloc (size_t nmemb, size_t size)
             return nullptr;
         }
 
-    return (void *)memset_zero (new_a);
+    int status = memset_zero (new_a);
+
+    if (status == ERROR)
+        {
+            pr_error ("memset_zero");
+            return NULL;
+        }
+    return new_a;
 }
 
 void *
@@ -112,12 +120,19 @@ realloc (void *ptr, size_t size)
             table_inited = true;
         }
 
-    if (!size)
+    if (size == 0)
         {
             pr_warning ("size zero. Realloc acts like free");
             free (ptr);
             return nullptr;
         }
+
+    if (!ptr)
+        {
+            void *new_a = malloc (size);
+            return new_a;
+        }
+
     size_t segment_size = get_segment_size (ptr);
 
     if (segment_size == 0)
@@ -126,6 +141,12 @@ realloc (void *ptr, size_t size)
             return NULL;
         }
 
+    int status = remove_map_entry ((uint8_t *)ptr);
+    if (status == ERROR)
+        {
+            pr_error ("Could not remove map entries");
+            exit (EXIT_FAILURE);
+        }
     uint8_t *new_a = g_alloc_function (size);
 
     if (!new_a)
@@ -134,11 +155,11 @@ realloc (void *ptr, size_t size)
             return nullptr;
         }
 
-    new_a = move_mem (ptr, new_a, segment_size);
-    if (!new_a)
+    status = move_mem (ptr, new_a, segment_size);
+    if (status == ERROR)
         {
             pr_error ("Could not move memory");
-            return nullptr;
+            return NULL;
         }
     return (void *)new_a;
 }
