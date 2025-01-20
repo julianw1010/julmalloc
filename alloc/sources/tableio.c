@@ -1,3 +1,5 @@
+#include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "alloc/defines.h"
@@ -5,25 +7,22 @@
 #include "core/defines.h"
 
 #include "alloc/storage.h"
+#include "alloc/tableio.h"
 
-static int is_mem_addr (mem_addr addr);
+static bool is_low (const uint8_t *addr);
 
-static int is_low (mem_addr addr);
+static bool is_map_addr (const uint8_t *addr);
 
-static int set_nibble_value (map_addr addr, nibble_value n, bool low);
+static bool is_mem_addr (const uint8_t *addr);
 
-static nibble_value read_nibble_value (mem_addr addr, bool low);
+static uint8_t *get_map_addr (uint8_t *addr);
 
-static int is_map_addr (map_addr addr);
+static int set_value (uint8_t *addr, uint8_t n, bool low);
 
-static map_addr get_map_addr (mem_addr addr);
-
-// static mem_addr get_mem_addr(map_addr addr, bool low);
-
-static bool is_segment_beginning (mem_addr addr);
+static uint8_t read_value (uint8_t *addr, bool low);
 
 int
-set_map_value (mem_addr addr, nibble_value v)
+set_map_value (uint8_t *addr, uint8_t v)
 {
     if (!is_mem_addr (addr))
         {
@@ -31,14 +30,14 @@ set_map_value (mem_addr addr, nibble_value v)
             return ERROR;
         }
 
-    map_addr map_addr = get_map_addr (addr);
+    uint8_t *mapaddr = get_map_addr (addr);
     bool low = is_low (addr);
 
-    return set_nibble_value (map_addr, v, low);
+    return set_value (mapaddr, v, low);
 }
 
-byte_value
-read_map_value (mem_addr addr)
+uint8_t
+read_map_value (uint8_t *addr)
 {
     if (!is_mem_addr (addr))
         {
@@ -47,14 +46,14 @@ read_map_value (mem_addr addr)
             return ERROR;
         }
 
-    map_addr map_addr = get_map_addr (addr);
+    uint8_t *mapaddr = get_map_addr (addr);
     bool low = is_low (addr);
 
-    return read_nibble_value (map_addr, low);
+    return read_value (mapaddr, low);
 }
 
 int
-set_mem_value (mem_addr addr, byte_value v)
+set_mem_value (uint8_t *addr, uint8_t v)
 {
     if (!is_mem_addr (addr))
         {
@@ -63,73 +62,49 @@ set_mem_value (mem_addr addr, byte_value v)
         }
 
     pr_info ("Byte at %p is being changed to %d", addr, v);
-    set_byte_value (addr, v);
+    set_byte (addr, v);
     return SUCCESS;
 }
 
 size_t
-is_valid_gap (mem_addr addr, size_t target)
+is_valid_gap (uint8_t *addr, size_t target)
 {
-    if (read_map_value (addr) != FREE)
+    if (!is_gap_beginning (addr))
         {
-            pr_error ("Current map value not free");
+            pr_error ("Not a beginning of a gap");
             return 0;
         }
-    else
-        {
 
-            for (size_t i = 0; i < target; i++)
+    for (size_t i = 0; i < target; i++)
+        {
+            if ((addr + i) >= g_mem_end || read_map_value (addr + i) != FREE)
                 {
-                    if ((addr + i) >= g_mem_end
-                        || read_map_value (addr + i) != FREE)
-                        {
-                            return i;
-                        }
+                    return i;
                 }
-            return target;
         }
+    return target;
 }
 
-/*size_t get_segment_size(mem_addr addr) {
-    if(read_map_value(addr)!= FREE) {
-        pr_error("Current map value not free");
-        return 0;
-    } else {
-
-        for(size_t i = 0 ; i<target ; i++) {
-            if((addr + i) >= g_mem_end || read_map_value(addr + i) != FREE) {
-                return i;
-            }
-        }
-        return target;
-    }
-}*/
-
-static int
-is_low (mem_addr addr)
+static bool
+is_low (const uint8_t *addr)
 {
-    if (!is_mem_addr (addr))
-        {
-            pr_error ("Not a mem_addr");
-            return ERROR;
-        }
-    return (addr - g_mem_start) % 2;
+    return (bool)((addr - g_mem_start) % 2);
 }
 
-static int
-is_mem_addr (mem_addr addr)
+static bool
+is_mem_addr (const uint8_t *addr)
 {
-    return ((addr >= g_mem_start) && (addr < g_mem_end));
+    return (bool)((addr >= g_mem_start) && (addr < g_mem_end));
 }
 
-static int
-is_map_addr (map_addr addr)
+static bool
+is_map_addr (const uint8_t *addr)
 {
-    return (addr >= g_map_start && addr < g_map_end);
+    return (bool)(addr >= g_map_start && addr < g_map_end);
 }
 
 static int
-set_nibble_value (map_addr addr, nibble_value n, bool low)
+set_value (uint8_t *addr, uint8_t n, bool low)
 {
     if (!is_map_addr (addr))
         {
@@ -137,26 +112,26 @@ set_nibble_value (map_addr addr, nibble_value n, bool low)
                       g_map_start, g_map_end);
             return ERROR;
         }
-    uint8_t to_write;
+    uint8_t to_write = 0;
     if (low)
         {
-            to_write = (n << LOW_NIBBLE_OFFSET)
-                       | (read_byte_value (addr) & HIGH_NIBBLE);
+            to_write
+                = (n << LOW_NIBBLE_OFFSET) | (read_byte (addr) & HIGH_NIBBLE);
         }
     else
         {
-            to_write = (n << HIGH_NIBBLE_OFFSET)
-                       | (read_byte_value (addr) & LOW_NIBBLE);
+            to_write
+                = (n << HIGH_NIBBLE_OFFSET) | (read_byte (addr) & LOW_NIBBLE);
         }
     pr_info ("%s nibble at %p is being changed to %x. \n Total byte is being "
              "overwritten with %d",
              low ? "Lower" : "Higher", addr, n, to_write);
-    set_byte_value (addr, to_write);
+    set_byte (addr, to_write);
     return SUCCESS;
 }
 
-static nibble_value
-read_nibble_value (map_addr addr, bool low)
+static uint8_t
+read_value (uint8_t *addr, bool low)
 {
     if (!is_map_addr (addr))
         {
@@ -164,75 +139,63 @@ read_nibble_value (map_addr addr, bool low)
                       g_map_start, g_map_end);
             return ERROR;
         }
-    nibble_value n;
+    uint8_t n = 0;
     if (low)
         {
-            n = (LOW_NIBBLE & read_byte_value (addr)) >> LOW_NIBBLE_OFFSET;
+            n = (LOW_NIBBLE & read_byte (addr)) >> LOW_NIBBLE_OFFSET;
         }
     else
         {
-            n = (HIGH_NIBBLE & read_byte_value (addr)) >> HIGH_NIBBLE_OFFSET;
+            n = (HIGH_NIBBLE & read_byte (addr)) >> HIGH_NIBBLE_OFFSET;
         }
     pr_info ("Reading %s nibble %x at %p", low ? "Low" : "High", n, addr);
     return n;
 }
 
-/*static mem_addr get_mem_addr(map_addr addr, bool low) {
-    if(!is_map_addr(addr)) {
-        pr_error("Not a map_addr");
+/*staticuint8_t* get_map_addr*(uint8_t* addr, bool low) {
+    if(!is_map_addr*(addr)) {
+        pr_error("Not auint8_t*");
         return nullptr;
     }
     return (g_mem_start + (uint8_t)(addr-g_map_start)*2+low);
 }*/
 
-static map_addr
-get_map_addr (mem_addr addr)
+static uint8_t *
+get_map_addr (uint8_t *addr)
 {
     if (!is_mem_addr (addr))
         {
-            pr_error ("Not a mem_addr");
+            pr_error ("Not auint8_t*");
             return nullptr;
         }
     return (g_map_start + ((uint8_t)floor ((double)(addr - g_mem_start) / 2)));
 }
 
-/*static bool is_gap_beginning(mem_addr addr) {
-    if(read_map_value(addr) != FREE) {
-        pr_warning("Map value not FREE");
-        return false;
-    } else if(addr == g_mem_start) {
-        pr_info("Addr is beginning of space");
-        return true;
-    } else if(read_map_value(addr-1) == FREE) {
-        pr_info("Not beginning of GAP");
-        return false;
-    } else {
-        pr_info("Beginning of gap");
-        return true;
-    }
-}*/
-
-static bool
-is_segment_beginning (mem_addr addr)
+bool
+is_gap_beginning (uint8_t *addr)
 {
-    if (read_map_value (addr) == FREE)
+    if (read_map_value (addr) != FREE)
         {
-            pr_warning ("Not segment beginning");
+            pr_warning ("Map value not FREE");
             return false;
         }
-    else if (addr == g_mem_start)
+    if (addr == g_mem_start)
         {
             pr_info ("Addr is beginning of space");
             return true;
         }
-    else if (read_map_value (addr - 1) == FREE)
+    if (read_map_value (addr - 1) == FREE)
         {
             pr_info ("Not beginning of GAP");
             return false;
         }
-    else
-        {
-            pr_info ("Beginning of gap");
-            return true;
-        }
+
+    pr_info ("Beginning of gap");
+    return true;
+}
+
+bool
+is_segment_beginning (uint8_t *addr)
+{
+    return read_map_value (addr) == ALLOCD;
 }

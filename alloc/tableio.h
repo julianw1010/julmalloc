@@ -3,12 +3,16 @@
 
 #include "alloc/types.h"
 
-int set_map_value (mem_addr addr, nibble_value v);
+int set_map_value (uint8_t *addr, uint8_t v);
 
-nibble_value read_map_value (mem_addr addr);
+uint8_t read_map_value (uint8_t *addr);
 
-int set_mem_value (mem_addr addr, byte_value v);
+int set_mem_value (uint8_t *addr, uint8_t v);
 
-bool is_valid_gap (map_addr addr, size_t target);
+size_t is_valid_gap (uint8_t *addr, size_t target);
+
+bool is_gap_beginning (uint8_t *addr);
+
+bool is_segment_beginning (uint8_t *addr);
 
 #endif

@@ -31,7 +31,7 @@ malloc (size_t size)
             return nullptr;
         }
 
-    mem_addr new_a = g_alloc_function (size);
+    uint8_t *new_a = g_alloc_function (size);
     if (!new_a)
         {
             pr_error ("g_alloc_function failed.");
@@ -67,7 +67,7 @@ free (void *ptr)
             return;
         }
     pr_info ("%p", (uint8_t *)ptr);
-    if (remove_map_entry ((mem_addr)ptr))
+    if (remove_map_entry ((uint8_t *)ptr))
         {
             pr_error ("FREE error. Aborting");
             exit (EXIT_FAILURE);
@@ -75,7 +75,7 @@ free (void *ptr)
 }
 
 void *
-calloc (size_t n_memb, size_t size)
+calloc (size_t nmemb, size_t size)
 {
 
     if (!table_inited)
@@ -84,13 +84,13 @@ calloc (size_t n_memb, size_t size)
             table_inited = true;
         }
 
-    if (!n_memb || !size)
+    if (!nmemb || !size)
         {
             pr_warning ("Product of input is zero. No alloc");
             return nullptr;
         }
 
-    mem_addr new_a = (mem_addr)malloc (n_memb * size);
+    uint8_t *new_a = (uint8_t *)malloc (nmemb * size);
 
     if (!new_a)
         {
@@ -102,7 +102,7 @@ calloc (size_t n_memb, size_t size)
 }
 
 void *
-realloc (void *ptr, size_t new_size)
+realloc (void *ptr, size_t size)
 {
 
     if (!table_inited)
@@ -111,14 +111,14 @@ realloc (void *ptr, size_t new_size)
             table_inited = true;
         }
 
-    if (!new_size)
+    if (!size)
         {
             pr_warning ("size zero. Realloc acts like free");
             free (ptr);
             return nullptr;
         }
 
-    mem_addr new_a = g_alloc_function (new_size);
+    uint8_t *new_a = g_alloc_function (size);
 
     if (!new_a)
         {

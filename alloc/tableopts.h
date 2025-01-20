@@ -5,12 +5,12 @@
 
 void init_table ();
 
-mem_addr add_map_entry (mem_addr addr, size_t size);
+uint8_t *add_map_entry (uint8_t *addr, size_t size);
 
-int remove_map_entry (mem_addr start);
+int remove_map_entry (uint8_t *start);
 
-mem_addr memset_zero (mem_addr start);
+uint8_t *memset_zero (uint8_t *start);
 
-mem_addr move_mem (mem_addr old, mem_addr new);
+uint8_t *move_mem (uint8_t *old, uint8_t *new);
 
 #endif

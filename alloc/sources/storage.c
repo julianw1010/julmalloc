@@ -1,13 +1,13 @@
 #include "alloc/types.h"
 
-byte_value
-read_byte_value (addr_t addr)
+uint8_t
+read_byte (const uint8_t *addr)
 {
     return *addr;
 }
 
 void
-set_byte_value (addr_t addr, byte_value v)
+set_byte (uint8_t *addr, uint8_t v)
 {
     *addr = v;
 }

@@ -32,7 +32,7 @@ main (int argc, char *argv[])
     pr_info ("First int addr: %p Mem start : %p", (void *)number1, g_mem_start);
     while (i > 0)
         {
-            free (g_mem_start + (i - 1) * sizeof (int));
+            free (g_mem_start + ((i - 1) * sizeof (int)));
             pr_info ("Freed number");
             i--;
         }

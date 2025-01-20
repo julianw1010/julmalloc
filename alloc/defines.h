@@ -5,13 +5,14 @@
 #define ALLOC_DEFINES_H
 
 #include <math.h>
+#include <stdint.h>
 
 #include "alloc/types.h"
 
-extern map_addr g_map_start;
-extern map_addr g_map_end;
-extern mem_addr g_mem_start;
-extern mem_addr g_mem_end;
+extern uint8_t *g_map_start;
+extern uint8_t *g_map_end;
+extern uint8_t *g_mem_start;
+extern uint8_t *g_mem_end;
 extern alloc_function g_alloc_function;
 
 #define HEAP_SIZE (size_t)1000
@@ -27,8 +28,8 @@ enum
 
 enum
 {
-    HIGH_NIBBLE = (1U << 7U | 1U << 6U | 1U << 5U | 1U << 4U),
-    LOW_NIBBLE = (1U << 3U | 1U << 2U | 1U << 1U | 1U << 0U),
+    HIGH_NIBBLE = (1 << 7 | 1 << 6 | 1 << 5 | 1 << 4),
+    LOW_NIBBLE = (1 << 3 | 1 << 2 | 1 << 1 | 1 << 0),
     HIGH_NIBBLE_OFFSET = 4,
     LOW_NIBBLE_OFFSET = 0
 };

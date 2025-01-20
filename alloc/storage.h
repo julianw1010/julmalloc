@@ -3,7 +3,7 @@
 
 #include "alloc/types.h"
 
-byte_value read_byte_value (addr_t addr);
+uint8_t read_byte (uint8_t *addr);
 
-void set_byte_value (addr_t addr, byte_value v);
+void set_byte (uint8_t *addr, uint8_t v);
 #endif

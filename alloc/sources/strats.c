@@ -7,23 +7,23 @@
 #include "alloc/tableio.h"
 alloc_function g_alloc_function;
 
-// TODO RETURNS address to new gap without allocating it
-mem_addr
+// TODO(julianw): RETURNS address to new gap without allocating it
+uint8_t *
 best_fit (size_t size)
 {
     return g_mem_start;
 }
 
-mem_addr
+uint8_t *
 worst_fit (size_t size)
 {
     return g_mem_start;
 }
 
-mem_addr
+uint8_t *
 first_fit (size_t size)
 {
-    mem_addr iterator = g_mem_start;
+    uint8_t *iterator = g_mem_start;
     while (iterator < g_mem_end)
         {
             if (read_map_value (iterator) != FREE)
@@ -46,7 +46,7 @@ first_fit (size_t size)
     return nullptr;
 }
 
-mem_addr
+uint8_t *
 next_fit (size_t size)
 {
     return g_mem_start;
