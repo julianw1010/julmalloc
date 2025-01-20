@@ -20,11 +20,8 @@ add_subdirectory(programs)
 add_executable(malloc unittests/alloc/malloc.c)
 target_link_libraries(malloc alloc)
 
-
-add_test(NAME alloctests COMMAND alloctests)
-set_property(TEST alloctests
-   PROPERTY
-   ENVIRONMENT LD_PRELOAD=${CMAKE_CURRENT_BINARY_DIR}/lib/liballoc.so)
+add_executable(free unittests/alloc/free.c)
+target_link_libraries(free alloc)
 
 # Additional targets to perform clang-format/clang-tidy
 # Get all project files

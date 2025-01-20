@@ -90,4 +90,11 @@ bool check_heap_integrity();
  */
 size_t get_heap_used_space();
 
+/** @brief Erase memory table
+ *
+ * This function resets the memory table to UNALLOCATED
+ *
+ */
+void erase_table();
+
 #endif

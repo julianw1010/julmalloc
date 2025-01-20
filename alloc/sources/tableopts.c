@@ -39,6 +39,16 @@ void init_table() {
     pr_info("Initialized table to UNALLLOCATED all entries \n");
 }
 
+void erase_table() {
+    for (uint8_t *iterator = g_mem_start; iterator < g_mem_end; iterator++) {
+        if (set_map_value(iterator, UNALLLOCATED) == ERROR) {
+            pr_error("Could not set map value");
+            return;
+        }
+    }
+    pr_info("Initialized table to UNALLLOCATED all entries \n");
+}
+
 int add_map_entry(const uint8_t *m_addr, size_t size) {
     pr_info("Addr %p size %zu", m_addr, size);
 
@@ -127,14 +137,14 @@ int remove_map_entry(const uint8_t *m_addr) {
         return ERROR;
     }
 
-    if (set_map_value(m_addr, 0x0)) {
+    if (set_map_value(m_addr, UNALLLOCATED)) {
         pr_error("Could not set map value");
     }
 
     int i = 1;
     while (m_addr + i < g_mem_end &&
            read_map_value(m_addr + i) == ALLOCATED_CONSECUTIVE) {
-        if (set_map_value(m_addr + i, 0x0)) {
+        if (set_map_value(m_addr + i, UNALLLOCATED)) {
             pr_error("Could not set map value");
         }
         i++;
