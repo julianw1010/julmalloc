@@ -174,3 +174,18 @@ remove_map_entry (const uint8_t *start)
     pr_info ("Cleared %d map entries", i);
     return SUCCESS;
 }
+
+size_t
+get_heap_used_space ()
+{
+    size_t size = 0;
+    int i = 0;
+    while (g_mem_start + i < g_mem_end)
+        {
+            if (read_map_value (g_mem_start + i) != FREE)
+                {
+                    size++;
+                }
+        }
+    return size;
+}
