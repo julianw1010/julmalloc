@@ -1,15 +1,13 @@
+#include "alloc/tableopts.h"
+#include "alloc/defines.h"
+#include "alloc/strats.h"
+#include "alloc/tableio.h"
+#include "alloc/types.h"
+#include "core/defines.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#include "alloc/defines.h"
-#include "alloc/types.h"
-#include "core/defines.h"
-
-#include "alloc/strats.h"
-#include "alloc/tableio.h"
-#include "alloc/tableopts.h"
 
 uint8_t *g_map_start;
 uint8_t *g_map_end;
@@ -34,17 +32,17 @@ void init_table() {
     pr_info("Set alloc function");
 
     for (uint8_t *iterator = g_mem_start; iterator < g_mem_end; iterator++) {
-        if (set_map_value(iterator, FREE) == ERROR) {
+        if (set_map_value(iterator, UNALLLOCATED) == ERROR) {
             pr_error("Could not set map value");
         }
     }
-    pr_info("Initialized table to FREE all entries \n");
+    pr_info("Initialized table to UNALLLOCATED all entries \n");
 }
 
-int add_map_entry(const uint8_t *addr, size_t size) {
-    pr_info("Addr %p size %zu", addr, size);
+int add_map_entry(const uint8_t *m_addr, size_t size) {
+    pr_info("Addr %p size %zu", m_addr, size);
 
-    if (get_gap_size(addr, size) < size) {
+    if (get_gap_size(m_addr, size) < size) {
         pr_error("Gap too small");
         return ERROR;
     }
@@ -52,37 +50,37 @@ int add_map_entry(const uint8_t *addr, size_t size) {
     //  0x1  0xf  0xf  0xf...
     // 7654 3210 7654 3210
 
-    if (set_map_value(addr, ALLOCD)) {
+    if (set_map_value(m_addr, ALLOCATED_START)) {
         pr_error("Could not set beginning of map area");
     }
 
     for (size_t i = 1; i < size; i++) {
-        if (set_map_value((addr + i), CONSEC)) {
+        if (set_map_value((m_addr + i), ALLOCATED_CONSECUTIVE)) {
             pr_error("Could not set map value");
         }
     }
     return SUCCESS;
 }
 
-int memset_zero(uint8_t *start) {
-    if (!is_segment_beginning(start)) {
+int memset_zero(uint8_t *m_addr) {
+    if (!is_segment_beginning(m_addr)) {
         pr_error("Invalid parameters. start doesn't point to the "
                  "beginning of allocated space");
         return ERROR;
     }
 
-    if (set_mem_value(start, FREE)) {
+    if (set_mem_value(m_addr, UNALLLOCATED)) {
         pr_error("Could not set mem value");
         return ERROR;
     }
 
     int i = 1;
-    while (read_map_value(start + i) == CONSEC) {
-        if (start + i >= g_mem_end) {
+    while (read_map_value(m_addr + i) == ALLOCATED_CONSECUTIVE) {
+        if (m_addr + i >= g_mem_end) {
             pr_error("Memory access violation");
             return ERROR;
         }
-        if (set_mem_value(start + i, FREE)) {
+        if (set_mem_value(m_addr + i, UNALLLOCATED)) {
             pr_error("Could not set mem value");
         }
         i++;
@@ -92,27 +90,28 @@ int memset_zero(uint8_t *start) {
     return SUCCESS;
 }
 
-int move_mem(uint8_t *old, uint8_t *new, size_t segment_size) {
-    if (!old | !new) {
+int copy_mem(uint8_t *m_addr_old, uint8_t *m_addr_new, size_t segment_size) {
+    if (!m_addr_old | !m_addr_new) {
         pr_error("Invalid pointers");
         return ERROR;
     }
 
-    if (!is_mem_addr(old) || !is_mem_addr(new)) {
+    if (!is_mem_addr(m_addr_old) || !is_mem_addr(m_addr_new)) {
         pr_error("Adress out of bounds");
         return ERROR;
     }
-    if (old == new) {
+    if (m_addr_old == m_addr_new) {
         pr_info("Nothing to do");
         return SUCCESS;
     }
     size_t i = 0;
     while (i < segment_size) {
-        if (old + i >= g_mem_end) {
+        if (m_addr_old + i >= g_mem_end) {
             pr_error("Memory access violation");
             return ERROR;
         }
-        if (set_mem_value(new + i, read_map_value(old + i)) == ERROR) {
+        if (set_mem_value(m_addr_new + i, read_map_value(m_addr_old + i)) ==
+            ERROR) {
             pr_error("Write error ");
             return ERROR;
         }
@@ -122,19 +121,20 @@ int move_mem(uint8_t *old, uint8_t *new, size_t segment_size) {
     return SUCCESS;
 }
 
-int remove_map_entry(const uint8_t *start) {
-    if (read_map_value(start) != ALLOCD) {
+int remove_map_entry(const uint8_t *m_addr) {
+    if (read_map_value(m_addr) != ALLOCATED_START) {
         pr_error("Not a beginning of a segment");
         return ERROR;
     }
 
-    if (set_map_value(start, 0x0)) {
+    if (set_map_value(m_addr, 0x0)) {
         pr_error("Could not set map value");
     }
 
     int i = 1;
-    while (start + i < g_mem_end && read_map_value(start + i) == CONSEC) {
-        if (set_map_value(start + i, 0x0)) {
+    while (m_addr + i < g_mem_end &&
+           read_map_value(m_addr + i) == ALLOCATED_CONSECUTIVE) {
+        if (set_map_value(m_addr + i, 0x0)) {
             pr_error("Could not set map value");
         }
         i++;
@@ -148,7 +148,7 @@ size_t get_heap_used_space() {
     size_t size = 0;
     int i = 0;
     while (g_mem_start + i < g_mem_end) {
-        if (read_map_value(g_mem_start + i) != FREE) {
+        if (read_map_value(g_mem_start + i) != UNALLLOCATED) {
             size++;
         }
     }
@@ -160,13 +160,13 @@ bool check_heap_integrity() {
     bool insegment = false;
     while (g_mem_start + i < g_mem_end) {
         uint8_t value = read_map_value(g_mem_start + i);
-        if (value == FREE) {
+        if (value == UNALLLOCATED) {
             insegment = false;
         }
-        if (value == ALLOCD) {
+        if (value == ALLOCATED_START) {
             insegment = true;
         }
-        if (!insegment && value == CONSEC) {
+        if (!insegment && value == ALLOCATED_CONSECUTIVE) {
             pr_error("Integrity violation");
             return false;
         }

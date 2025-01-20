@@ -1,10 +1,8 @@
-#include <stddef.h>
-
 #include "alloc/defines.h"
+#include "alloc/tableio.h"
 #include "alloc/types.h"
 #include "core/defines.h"
-
-#include "alloc/tableio.h"
+#include <stddef.h>
 alloc_function g_alloc_function;
 
 // TODO(julianw): RETURNS address to new gap without allocating it
@@ -15,13 +13,13 @@ uint8_t *worst_fit(size_t size) { return g_mem_start; }
 uint8_t *first_fit(size_t size) {
     uint8_t *iterator = g_mem_start;
     while (iterator < g_mem_end) {
-        if (read_map_value(iterator) != FREE) {
-            pr_warning("Map entry at %p is NOT FREE", iterator);
+        if (read_map_value(iterator) != UNALLLOCATED) {
+            pr_warning("Map entry at %p is NOT UNALLLOCATED", iterator);
             iterator++;
             continue;
         }
 
-        pr_info("Map entry at %p is FREE", iterator);
+        pr_info("Map entry at %p is UNALLLOCATED", iterator);
         size_t gap_size = get_gap_size(iterator, size);
         if (gap_size >= size) {
             pr_info("Found gap at %p of size %zu", iterator, size);

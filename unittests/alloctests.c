@@ -1,13 +1,11 @@
 
 // Testclient for (m/re/c)-alloc and free tests
 
+#include "alloc/defines.h"
+#include "alloc/tableopts.h"
+#include "core/defines.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "alloc/defines.h"
-#include "core/defines.h"
-
-#include "alloc/tableopts.h"
 
 int main(int argc, char *argv[]) {
     int i = 1;

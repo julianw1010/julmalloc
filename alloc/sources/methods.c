@@ -2,18 +2,16 @@
  * @brief Implementation of allocation functions
  */
 
+#include "alloc/defines.h"
+#include "alloc/tableio.h"
+#include "alloc/tableopts.h"
+#include "alloc/types.h"
+#include "core/defines.h"
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "alloc/defines.h"
-#include "alloc/types.h"
-#include "core/defines.h"
-
-#include "alloc/tableio.h"
-#include "alloc/tableopts.h"
 
 static bool table_inited = false;
 
@@ -60,7 +58,7 @@ void free(void *ptr) {
     pr_info("%p", (uint8_t *)ptr);
     int status = remove_map_entry((uint8_t *)ptr);
     if (status == ERROR) {
-        pr_error("FREE error. Aborting");
+        pr_error("UNALLLOCATED error. Aborting");
         exit(EXIT_FAILURE);
     }
 }
@@ -130,7 +128,7 @@ void *realloc(void *ptr, size_t size) {
         return nullptr;
     }
 
-    status = move_mem(ptr, new_a, segment_size);
+    status = copy_mem(ptr, new_a, segment_size);
     if (status == ERROR) {
         pr_error("Could not move memory");
         return NULL;
