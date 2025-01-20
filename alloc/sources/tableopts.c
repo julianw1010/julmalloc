@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -188,4 +189,29 @@ get_heap_used_space ()
                 }
         }
     return size;
+}
+
+bool
+check_heap_integrity ()
+{
+    int i = 0;
+    bool insegment = false;
+    while (g_mem_start + i < g_mem_end)
+        {
+            uint8_t value = read_map_value (g_mem_start + i);
+            if (value == FREE)
+                {
+                    insegment = false;
+                }
+            if (value == ALLOCD)
+                {
+                    insegment = true;
+                }
+            if (!insegment && value == CONSEC)
+                {
+                    pr_error ("Integrity violation");
+                    return false;
+                }
+        }
+    return true;
 }
