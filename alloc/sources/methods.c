@@ -27,6 +27,7 @@ void *malloc(size_t size) {
     }
 
     uint8_t *new_a = g_alloc_function(size);
+
     if (!new_a) {
         pr_error("g_alloc_function failed.");
         return nullptr;

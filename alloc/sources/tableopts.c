@@ -170,6 +170,7 @@ bool check_heap_integrity() {
             pr_error("Integrity violation");
             return false;
         }
+        i++;
     }
     return true;
 }

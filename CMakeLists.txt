@@ -17,8 +17,8 @@ add_subdirectory(alloc)
 add_subdirectory(unittests)
 add_subdirectory(programs)
 
-add_executable(alloctests unittests/alloctests.c)
-target_link_libraries(alloctests alloc)
+add_executable(malloc unittests/alloc/malloc.c)
+target_link_libraries(malloc alloc)
 
 
 add_test(NAME alloctests COMMAND alloctests)

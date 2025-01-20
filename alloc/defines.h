@@ -15,7 +15,7 @@ extern uint8_t *g_mem_end;   /**< Address of end of memory area exclusive */
 extern alloc_function g_alloc_function; /**< Function pointer  */
 
 #define HEAP_SIZE                                                              \
-    (size_t)1000 /**< Size of heap including map table and memory area */
+    (size_t)100 /**< Size of heap including map table and memory area */
 #define TABLE_SIZE                                                             \
     (size_t)floor(                                                             \
         ((double)1 / 3) *                                                      \
