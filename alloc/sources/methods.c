@@ -138,7 +138,7 @@ realloc (void *ptr, size_t size)
     if (segment_size == 0)
         {
             pr_warning ("Invalid pointer");
-            return NULL;
+            return nullptr;
         }
 
     int status = remove_map_entry ((uint8_t *)ptr);
