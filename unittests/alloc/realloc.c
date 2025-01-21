@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
         }
         for (size_t k = 0; k < j - 1; k++) {
             for (size_t i = 0; i < n_maxentries; i++) {
-                if (!realloc(g_mem_start + (i * (j - k)), j - (k + 1))) {
+                if (!realloc(g_mem_start + i * j, j - (k + 1))) {
                     pr_error("Realloc failed");
                     return EXIT_FAILURE;
                 }

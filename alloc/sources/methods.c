@@ -118,7 +118,7 @@ void *realloc(void *ptr, size_t size) {
     }
 
     if (!ptr) {
-        pr_warning("ptr iss NULL. realloc acts like malloc");
+        pr_warning("ptr is NULL. realloc acts like malloc");
         void *new_a = malloc(size);
         return new_a;
     }
@@ -137,17 +137,21 @@ void *realloc(void *ptr, size_t size) {
 
     // Try to expand or shrink first
 
-    if (old_size < size) {
+    if (size < old_size) {
         size_t i = 0;
-        while (old_size + i < size) {
-            int status = set_map_value(ptr + old_size + i, UNALLOCATED);
+        while (size + i < old_size) {
+            int status = set_map_value(ptr + size + i, UNALLOCATED);
             if (status == ERROR) {
                 pr_error("Could not shrink space");
                 return nullptr;
             }
+            i++;
         }
+
+        return ptr;
     }
 
+    // size > old_size.
     if (old_size + get_gap_size((uint8_t *)ptr + 1, size, nullptr) <= size) {
         size_t i = 0;
         while (old_size + i < size) {
