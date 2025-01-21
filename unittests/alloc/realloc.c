@@ -48,6 +48,23 @@ static int specialcases() {
 
     erase_table();
 
+    // Check if realloc fails on trying to expand filled table
+
+    if (!malloc(STORAGE_SIZE)) {
+        pr_error("malloc");
+        return EXIT_FAILURE;
+    }
+
+    if (get_heap_used_space() != STORAGE_SIZE) {
+        pr_error("Memory size mismatch");
+        return EXIT_FAILURE;
+    }
+
+    if (realloc(g_mem_start, STORAGE_SIZE + 1)) {
+        pr_error("Tried to realloc segment beyond max storage size");
+        return EXIT_FAILURE;
+    }
+
     return EXIT_SUCCESS;
 }
 
