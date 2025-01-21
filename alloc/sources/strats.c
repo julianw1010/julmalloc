@@ -8,7 +8,23 @@ alloc_function g_alloc_function;
 // TODO(julianw): RETURNS address to new gap without allocating it
 uint8_t *best_fit(size_t size, uint8_t *ignore) { return g_mem_start; }
 
-uint8_t *worst_fit(size_t size, uint8_t *ignore) { return g_mem_start; }
+uint8_t *worst_fit(size_t size, uint8_t *ignore) {
+
+    size_t i = 0;
+    size_t largest_gap = 0;
+    uint8_t *lg_addr = NULL;
+    while (g_mem_start + i < g_mem_end) {
+
+        size_t gap_size = get_gap_size(g_mem_start + i, size, ignore);
+        if (gap_size > largest_gap) {
+            pr_info("Found gap at %p of size %zu", g_mem_start + i, size);
+            largest_gap = gap_size
+        }
+        i++;
+    }
+    pr_warning("Reached end of loop without a gap found. Storage is full");
+    return nullptr;
+}
 
 uint8_t *first_fit(size_t size, uint8_t *ignore) {
     size_t i = 0;
