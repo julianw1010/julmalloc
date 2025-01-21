@@ -33,6 +33,7 @@ uint8_t read_map_value(const uint8_t *m_addr) {
         pr_error("Invalid address %p, Addr-Beg: %p End %p", m_addr, g_mem_start,
                  g_mem_end);
         exit(EXIT_FAILURE);
+        return 0;
     }
 
     uint8_t *p_addr = get_map_addr(m_addr);
@@ -134,6 +135,7 @@ static uint8_t read_map_value_helper(const uint8_t *p_addr, bool low) {
         pr_error("Invalid address %p, Addr-Beg: %p End %p", p_addr, g_map_start,
                  g_map_end);
         exit(EXIT_FAILURE);
+        return 0;
     }
     uint8_t n = 0;
     if (low) {

@@ -54,6 +54,7 @@ void free(void *ptr) {
     }
 
     if (!ptr) {
+        pr_warning("Null pointer %ptr", ptr);
         return;
     }
     pr_info("%p", (uint8_t *)ptr);
@@ -120,7 +121,7 @@ void *realloc(void *ptr, size_t size) {
     int status = remove_map_entry((uint8_t *)ptr);
     if (status == ERROR) {
         pr_error("Could not remove map entries");
-        exit(EXIT_FAILURE);
+        return nullptr;
     }
     uint8_t *new_a = g_alloc_function(size);
 
@@ -132,7 +133,7 @@ void *realloc(void *ptr, size_t size) {
     status = copy_mem(ptr, new_a, segment_size);
     if (status == ERROR) {
         pr_error("Could not move memory");
-        return NULL;
+        return nullptr;
     }
     return (void *)new_a;
 }

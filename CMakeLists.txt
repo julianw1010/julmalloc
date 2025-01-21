@@ -17,12 +17,6 @@ add_subdirectory(alloc)
 add_subdirectory(unittests)
 add_subdirectory(programs)
 
-add_executable(malloc unittests/alloc/malloc.c)
-target_link_libraries(malloc alloc)
-
-add_executable(free unittests/alloc/free.c)
-target_link_libraries(free alloc)
-
 # Additional targets to perform clang-format/clang-tidy
 # Get all project files
 file(GLOB_RECURSE
