@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Module for allocation function clones
+ */
 #ifndef ALLOC_METHODS_H
 #define ALLOC_METHODS_H
 
@@ -42,8 +46,9 @@ void *calloc(size_t n_memb, size_t size);
 /** @brief A realloc clone
  *
  * This function acts like realloc(). It changes the space of allocated space to
- * new size and returns a pointer to the new segment. If ptr is null, a simple
- * malloc() is performed. If size is null, a simple free() is performed.
+ * new size and returns a pointer to the new segment. If ptr is nullptr, a
+ * simple malloc() is performed. If size is null, nullptr is returned without
+ * doing anything.
  *
  * @param[in] ptr Pointer to beginning of segment
  * @param[in] size  Size of new space containing data of old segment

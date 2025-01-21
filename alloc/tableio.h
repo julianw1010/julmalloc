@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief Modules to directly alter map or memory entries of the memory table
+ */
+
 #ifndef ALLOC_TABLEIO_H
 #define ALLOC_TABLEIO_H
 

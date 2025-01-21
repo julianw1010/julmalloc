@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief Modules for more general table options, making use of those functions
+ * defines in tableio
+ */
 #ifndef ALLOC_TABLEOPTS_H
 #define ALLOC_TABLEOPTS_H
 

@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Module for storage drivers
+ */
 #ifndef ALLOC_STORAGE_H
 #define ALLOC_STORAGE_H
 

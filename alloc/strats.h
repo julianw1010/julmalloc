@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Module to change the currently used memory algorithm
+ */
 #ifndef ALLOC_STRATS_H
 #define ALLOC_STRATS_H
 

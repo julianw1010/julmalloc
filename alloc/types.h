@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @brief Allocation related typedefs
+ */
 #ifndef ALLOC_TYPES_H
 #define ALLOC_TYPES_H
 

@@ -1,5 +1,6 @@
 /**
- * @brief Alloc defines
+ * @file
+ * @brief Defines for memory allocation
  */
 #ifndef ALLOC_DEFINES_H
 #define ALLOC_DEFINES_H
