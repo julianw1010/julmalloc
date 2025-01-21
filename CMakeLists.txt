@@ -12,6 +12,7 @@ install(CODE "
 ")
 
 set(CMAKE_C_CLANG_TIDY "clang-tidy")
+set(CMAKE_DEBUG_POSTFIX d)
 
 add_subdirectory(alloc)
 add_subdirectory(unittests)
@@ -35,3 +36,5 @@ if(CLANG_FORMAT)
         ${ALL_C_SOURCE_FILES}
     )
 endif()
+
+set_target_properties(testclient editorclient server PROPERTIES DEBUG_POSTFIX "d")
