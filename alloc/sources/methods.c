@@ -98,6 +98,19 @@ void *calloc(size_t nmemb, size_t size) {
     return new_a;
 }
 
+// Idea: Remove old map entries, without modifying the bytes in the memory
+// section.
+// Then search for a new gap with the memory search algorithm which now thinks
+// the previous segment is unallocated. Since the search algorithms are read
+// only, this doesn't cause any problems.
+// If the memory algorithm finds a new gap (which might also be the same address
+// as the old address), copy memory from old address to new address.
+// It is not possible that while copying, data from the old segment is
+// overwritten before it is copied because the search algorithms will always
+// allocate at the beginning of a gap, never in the middle. If the new address
+// is the same as the old address, no data is being copied regardless.
+// After copying the bytes, add map entires of the new size to the new address.
+// Return the new address.
 void *realloc(void *ptr, size_t size) {
 
     if (!table_inited) {
@@ -115,9 +128,9 @@ void *realloc(void *ptr, size_t size) {
         return new_a;
     }
 
-    size_t segment_size = get_segment_size(ptr);
+    size_t old_size = get_segment_size(ptr);
 
-    if (segment_size == 0) {
+    if (old_size == 0) {
         pr_warning("Invalid pointer");
         return nullptr;
     }
@@ -129,15 +142,30 @@ void *realloc(void *ptr, size_t size) {
     }
     uint8_t *new_a = g_alloc_function(size);
 
+    // Could not realloc. Restore old map entries, although continue with
+    // caution.
     if (!new_a) {
         pr_error("Realloc failed");
+        int status = add_map_entry((uint8_t *)ptr, old_size);
+        if (status == ERROR) {
+            pr_error("Could not restore map entries");
+        }
         return nullptr;
     }
 
-    status = copy_mem(ptr, new_a, segment_size);
+    // Copy memory from old space to new space
+    status = copy_mem(ptr, new_a, old_size);
     if (status == ERROR) {
         pr_error("Could not move memory");
         return nullptr;
     }
+
+    // Add map entries for the new moved space
+    status = add_map_entry(new_a, size);
+    if (status == ERROR) {
+        pr_error("Could not add new map entries");
+        return nullptr;
+    }
+
     return (void *)new_a;
 }

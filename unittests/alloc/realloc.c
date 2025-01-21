@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
         }
         for (size_t k = 0; k < j - 1; k++) {
             for (size_t i = 0; i < n_maxentries; i++) {
-                if (!realloc(g_map_start + (i * (j - k)), j - (k + 1))) {
+                if (!realloc(g_mem_start + (i * (j - k)), j - (k + 1))) {
                     pr_error("Realloc failed");
                     return EXIT_FAILURE;
                 }
@@ -75,9 +75,12 @@ int main(int argc, char *argv[]) {
                     return EXIT_FAILURE;
                 }
             }
-
-            if (get_heap_used_space() != (j - (k + 1)) * n_maxentries) {
-                pr_error("Allocated memory size mismatch");
+            size_t sizemes = get_heap_used_space();
+            size_t newsize = (j - (k + 1)) * n_maxentries;
+            if (sizemes != newsize) {
+                pr_error("Memory size %zu Allocated memory size mismatch for "
+                         "size %zu. Expected %zu but got %zu",
+                         STORAGE_SIZE, j, newsize, sizemes);
                 return EXIT_FAILURE;
             }
         }
