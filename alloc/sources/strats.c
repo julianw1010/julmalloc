@@ -16,8 +16,8 @@ uint8_t *first_fit(size_t size, uint8_t *ignore) {
 
         size_t gap_size = get_gap_size(g_mem_start + i, size, ignore);
         if (gap_size >= size) {
-            pr_info("Found gap at %p of size %zu", g_map_start + i, size);
-            return g_map_start + i;
+            pr_info("Found gap at %p of size %zu", g_mem_start + i, size);
+            return g_mem_start + i;
         }
         i++;
     }

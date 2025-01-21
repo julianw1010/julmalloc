@@ -28,7 +28,7 @@ void *malloc(size_t size) {
         return nullptr;
     }
 
-    uint8_t *new_a = g_alloc_function(size, NULL);
+    uint8_t *new_a = g_alloc_function(size, nullptr);
 
     if (!new_a) {
         pr_error("g_alloc_function failed.");
@@ -100,19 +100,11 @@ void *calloc(size_t nmemb, size_t size) {
 
 // Idea: Try to expand or shrink existing area, if possible.
 // Otherwise:
-// Remove old map entries, without modifying the bytes in the memory
-// section.
-// Then search for a new gap with the memory search algorithm which now thinks
-// the previous segment is unallocated. Since the search algorithms are read
-// only, this doesn't cause any problems.
-// If the memory algorithm finds a new gap (which might also be the same address
-// as the old address), copy memory from old address to new address.
-// It is not possible that while copying, data from the old segment is
-// overwritten before it is copied because the search algorithms will always
-// allocate at the beginning of a gap, never in the middle. If the new address
-// is the same as the old address, no data is being copied regardless.
-// After copying the bytes, add map entires of the new size to the new address.
-// Return the new address.
+// Search for a new gap with the memory search algorithm. Pass the old address
+// beginning as ignore value, the allocator will think this section is
+// unallocated.
+// If the memory algorithm finds a new gap, remove old map entries, add new map
+// entries and copy data of size old_size to the new allocated space
 void *realloc(void *ptr, size_t size) {
 
     if (!table_inited) {

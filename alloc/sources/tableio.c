@@ -67,7 +67,11 @@ uint8_t read_mem_value(uint8_t *m_addr, bool *ok) {
 
 size_t get_gap_size(const uint8_t *m_addr, size_t target, uint8_t *ignore) {
 
-    if (!m_addr || !is_mem_addr(m_addr)) {
+    if (!m_addr) {
+        pr_error("Invalid address");
+    }
+
+    if (!is_mem_addr(m_addr)) {
         pr_error("Not a memory address");
         return 0;
     }
