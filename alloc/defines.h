@@ -25,7 +25,7 @@ extern alloc_function g_alloc_function; /**< Function pointer  */
      TABLE_SIZE) /**< Size of the memory area, two thirds of the total size */
 
 enum {
-    UNALLLOCATED = 0x0, /**< Map entry indicating unallocated space */
+    UNALLOCATED = 0x0, /**< Map entry indicating unallocated space */
 
     ALLOCATED_START =
         0x1, /**< Map entry indicating beginning of allocated space */

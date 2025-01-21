@@ -65,13 +65,15 @@ uint8_t read_mem_value(uint8_t *m_addr, bool *ok) {
     return read_byte(m_addr);
 }
 
-size_t get_gap_size(const uint8_t *m_addr, size_t target) {
-    if (!is_gap_beginning(m_addr)) {
-        pr_error("Not a beginning of a gap");
+size_t get_gap_size(const uint8_t *m_addr, size_t target, uint8_t *ignore) {
+
+    if (!m_addr || !is_mem_addr(m_addr)) {
+        pr_error("Not a memory address");
         return 0;
     }
 
-    for (size_t i = 0; i < target; i++) {
+    size_t i = 0;
+    while (i < target) {
         if ((m_addr + i) >= g_mem_end) {
             return i;
         }
@@ -83,9 +85,15 @@ size_t get_gap_size(const uint8_t *m_addr, size_t target) {
             return 0;
         }
 
-        if (value != UNALLLOCATED) {
+        if (value != UNALLOCATED) {
+            if (ignore && (m_addr + i == ignore)) {
+                size_t ignoresize = get_segment_size(ignore);
+                i += ignoresize;
+                continue;
+            }
             return i;
         }
+        i++;
     }
 
     return target;
@@ -123,39 +131,6 @@ bool is_segment_beginning(const uint8_t *m_addr, bool *ok) {
     }
 
     return value == ALLOCATED_START;
-}
-
-bool is_gap_beginning(const uint8_t *m_addr) {
-    bool ok = false;
-    uint8_t mapvalue = read_map_value(m_addr, &ok);
-    if (!ok) {
-        pr_error("Read error");
-        return false;
-    }
-
-    if (mapvalue != UNALLLOCATED) {
-        pr_warning("Map value not UNALLLOCATED");
-        return false;
-    }
-    if (m_addr == g_mem_start) {
-        pr_info("Addr is beginning of space");
-        return true;
-    }
-    bool ok1 = false;
-    uint8_t mv_prev = read_map_value(m_addr - 1, &ok1);
-
-    if (!ok1) {
-        pr_error("Read error");
-        return false;
-    }
-
-    if (mv_prev == UNALLLOCATED) {
-        pr_info("Not beginning of GAP");
-        return false;
-    }
-
-    pr_info("Beginning of gap");
-    return true;
 }
 
 bool is_map_addr(const uint8_t *p_addr) {

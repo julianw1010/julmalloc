@@ -6,38 +6,26 @@
 alloc_function g_alloc_function;
 
 // TODO(julianw): RETURNS address to new gap without allocating it
-uint8_t *best_fit(size_t size) { return g_mem_start; }
+uint8_t *best_fit(size_t size, uint8_t *ignore) { return g_mem_start; }
 
-uint8_t *worst_fit(size_t size) { return g_mem_start; }
+uint8_t *worst_fit(size_t size, uint8_t *ignore) { return g_mem_start; }
 
-uint8_t *first_fit(size_t size) {
-    uint8_t *iterator = g_mem_start;
-    while (iterator < g_mem_end) {
-        bool ok = false;
-        uint8_t value = read_map_value(iterator, &ok);
-        if (!ok) {
-            pr_error("Read error");
-            return nullptr;
-        }
-        if (value != UNALLLOCATED) {
-            // pr_warning("Map entry at %p is NOT UNALLLOCATED", iterator);
-            iterator++;
-            continue;
-        }
+uint8_t *first_fit(size_t size, uint8_t *ignore) {
+    size_t i = 0;
+    while (g_mem_start + i < g_mem_end) {
 
-        pr_info("Map entry at %p is UNALLLOCATED", iterator);
-        size_t gap_size = get_gap_size(iterator, size);
+        size_t gap_size = get_gap_size(g_mem_start + i, size, ignore);
         if (gap_size >= size) {
-            pr_info("Found gap at %p of size %zu", iterator, size);
-            return iterator;
+            pr_info("Found gap at %p of size %zu", g_map_start + i, size);
+            return g_map_start + i;
         }
-        iterator += gap_size;
+        i++;
     }
     pr_warning("Reached end of loop without a gap found. Storage is full");
     return nullptr;
 }
 
-uint8_t *next_fit(size_t size) { return g_mem_start; }
+uint8_t *next_fit(size_t size, uint8_t *ignore) { return g_mem_start; }
 
 void set_alloc_function(alloc_strat_e strat) {
     switch (strat) {

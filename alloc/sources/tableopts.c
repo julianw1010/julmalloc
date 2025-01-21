@@ -32,27 +32,27 @@ void init_table() {
     pr_info("Set alloc function");
 
     for (uint8_t *iterator = g_mem_start; iterator < g_mem_end; iterator++) {
-        if (set_map_value(iterator, UNALLLOCATED) == ERROR) {
+        if (set_map_value(iterator, UNALLOCATED) == ERROR) {
             pr_error("Could not set map value");
         }
     }
-    pr_info("Initialized table to UNALLLOCATED all entries \n");
+    pr_info("Initialized table to UNALLOCATED all entries \n");
 }
 
 void erase_table() {
     for (uint8_t *iterator = g_mem_start; iterator < g_mem_end; iterator++) {
-        if (set_map_value(iterator, UNALLLOCATED) == ERROR) {
+        if (set_map_value(iterator, UNALLOCATED) == ERROR) {
             pr_error("Could not set map value");
             return;
         }
     }
-    pr_info("Initialized table to UNALLLOCATED all entries \n");
+    pr_info("Initialized table to UNALLOCATED all entries \n");
 }
 
 int add_map_entry(const uint8_t *m_addr, size_t size) {
     pr_info("Addr %p size %zu", m_addr, size);
 
-    if (get_gap_size(m_addr, size) < size) {
+    if (get_gap_size(m_addr, size, NULL) < size) {
         pr_error("Gap too small");
         return ERROR;
     }
@@ -146,7 +146,7 @@ int remove_map_entry(const uint8_t *m_addr) {
         return ERROR;
     }
 
-    if (set_map_value(m_addr, UNALLLOCATED)) {
+    if (set_map_value(m_addr, UNALLOCATED)) {
         pr_error("Could not set map value");
     }
 
@@ -160,7 +160,7 @@ int remove_map_entry(const uint8_t *m_addr) {
         }
 
         if (mv_consec == ALLOCATED_CONSECUTIVE) {
-            if (set_map_value(m_addr + i, UNALLLOCATED)) {
+            if (set_map_value(m_addr + i, UNALLOCATED)) {
                 pr_error("Could not set map value");
                 return ERROR;
             }
@@ -184,7 +184,7 @@ size_t get_heap_used_space() {
             return 0;
         }
 
-        if (mapvalue != UNALLLOCATED) {
+        if (mapvalue != UNALLOCATED) {
             size++;
         }
         i++;
@@ -202,7 +202,7 @@ bool check_heap_integrity() {
             pr_error("Read error");
             return false;
         }
-        if (value == UNALLLOCATED) {
+        if (value == UNALLOCATED) {
             insegment = false;
         }
         if (value == ALLOCATED_START) {

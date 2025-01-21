@@ -26,7 +26,7 @@ int add_map_entry(const uint8_t *m_addr, size_t size);
  * @brief Removes a map entry for a given memory address
  *
  * Removes a map entry for a given memory address by setting all
- * corresponding map entries to UNALLLOCATED. This function only works if @p
+ * corresponding map entries to UNALLOCATED. This function only works if @p
  * m_addr points to a valid beginning of a memory segment, otherwise ERROR will
  * be returned.
  * @param[in] m_addr Memory address to a beginning of a segment

@@ -68,18 +68,19 @@ uint8_t read_mem_value(uint8_t *m_addr, bool *ok);
  * @param[in] m_addr Valid memory address
  * @param[in] target To avoid unnecessary calculations, specify a gap size
  * cutoff value on which the function preemtively returns
+ * @param[in] ignore Treat this segment as unallocated.
  * @return A value less or equal than @p target in any case, 0 if addr doesn't
  * point to the beginning of free space
  *
  */
-size_t get_gap_size(const uint8_t *m_addr, size_t target);
+size_t get_gap_size(const uint8_t *m_addr, size_t target, uint8_t *ignore);
 
 /** @brief Get the segment size of an allocated space
  *
  * Given a memory address, this function converts it into a map address, checks
  * if the map address points to the beginning of an allocated space, and then
  * counts the number of ALLOCATED_CONSECUTIVE map entries until a map entry with
- * UNALLLOCATED or ALLOCATED_START occurs.
+ * UNALLOCATED or ALLOCATED_START occurs.
  *
  * @param[in] m_addr Valid memory address pointing to beginning of a segment
  * @return 0 if @p m_addr is invalid address, segment size otherwise
@@ -101,23 +102,6 @@ size_t get_segment_size(const uint8_t *m_addr);
  * otherwise
  */
 bool is_segment_beginning(const uint8_t *m_addr, bool *ok);
-
-/** @brief Checks if address points to free segment beginning
- *
- * Given a memory address, this function converts it into a map address p_addr,
- * then checks if:
- * a) The byte where p_addr points to is set to UNALLLOCATED. If yes,
- * continue, otherwise return false
- * b) p_addr is equal to g_map_start, that is
- * p_addr points to beginning of map table. If yes, return true
- * c) (p_addr-1) points to a byte which is *not* UNALLLOCATED. If yes, return
- * true, otherwise return false
- *
- * @param[in] m_addr Valid memory address
- * @return true if addr points to a beginning of unallocated space, false
- * otherwise
- */
-bool is_gap_beginning(const uint8_t *m_addr);
 
 /** @brief Checks if address is valid map address
  *

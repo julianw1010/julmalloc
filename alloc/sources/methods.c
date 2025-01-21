@@ -28,7 +28,7 @@ void *malloc(size_t size) {
         return nullptr;
     }
 
-    uint8_t *new_a = g_alloc_function(size);
+    uint8_t *new_a = g_alloc_function(size, NULL);
 
     if (!new_a) {
         pr_error("g_alloc_function failed.");
@@ -62,7 +62,7 @@ void free(void *ptr) {
     pr_info("%p", (uint8_t *)ptr);
     int status = remove_map_entry((uint8_t *)ptr);
     if (status == ERROR) {
-        pr_error("UNALLLOCATED error. Aborting");
+        pr_error("UNALLOCATED error. Aborting");
         exit(EXIT_FAILURE);
     }
 }
@@ -98,7 +98,9 @@ void *calloc(size_t nmemb, size_t size) {
     return new_a;
 }
 
-// Idea: Remove old map entries, without modifying the bytes in the memory
+// Idea: Try to expand or shrink existing area, if possible.
+// Otherwise:
+// Remove old map entries, without modifying the bytes in the memory
 // section.
 // Then search for a new gap with the memory search algorithm which now thinks
 // the previous segment is unallocated. Since the search algorithms are read
@@ -118,8 +120,9 @@ void *realloc(void *ptr, size_t size) {
         table_inited = true;
     }
 
+    //  (C23: Undefined behaviour)
     if (size == 0) {
-        return NULL;
+        return nullptr;
     }
 
     if (!ptr) {
@@ -135,28 +138,49 @@ void *realloc(void *ptr, size_t size) {
         return nullptr;
     }
 
-    int status = remove_map_entry((uint8_t *)ptr);
-    if (status == ERROR) {
-        pr_error("Could not remove map entries");
-        return nullptr;
+    if (old_size == size) {
+        pr_warning("Same size, do nothing");
+        return ptr;
     }
-    uint8_t *new_a = g_alloc_function(size);
 
-    // Could not realloc. Restore old map entries, although continue with
-    // caution.
-    if (!new_a) {
-        pr_error("Realloc failed");
-        int status = add_map_entry((uint8_t *)ptr, old_size);
-        if (status == ERROR) {
-            pr_error("Could not restore map entries");
+    // Try to expand or shrink first
+
+    if (old_size < size) {
+        size_t i = 0;
+        while (old_size + i < size) {
+            int status = set_map_value(ptr + old_size + i, UNALLOCATED);
+            if (status == ERROR) {
+                pr_error("Could not shrink space");
+                return nullptr;
+            }
         }
+    }
+
+    if (old_size + get_gap_size((uint8_t *)ptr + 1, size, nullptr) <= size) {
+        size_t i = 0;
+        while (old_size + i < size) {
+            int status =
+                set_map_value(ptr + old_size + i, ALLOCATED_CONSECUTIVE);
+            if (status == ERROR) {
+                pr_error("Could not expand space");
+                return nullptr;
+            }
+        }
+
+        return ptr;
+    }
+
+    uint8_t *new_a = g_alloc_function(size, ptr);
+
+    // Could not realloc. Memory unchanged
+    if (!new_a) {
+        pr_error("No gap found");
         return nullptr;
     }
 
-    // Copy memory from old space to new space
-    status = copy_mem(ptr, new_a, old_size);
+    int status = remove_map_entry(ptr);
     if (status == ERROR) {
-        pr_error("Could not move memory");
+        pr_error("Could not remove map entry");
         return nullptr;
     }
 
@@ -164,6 +188,13 @@ void *realloc(void *ptr, size_t size) {
     status = add_map_entry(new_a, size);
     if (status == ERROR) {
         pr_error("Could not add new map entries");
+        return nullptr;
+    }
+
+    // Copy memory from old space to new space
+    status = copy_mem(ptr, new_a, old_size);
+    if (status == ERROR) {
+        pr_error("Could not move memory");
         return nullptr;
     }
 
