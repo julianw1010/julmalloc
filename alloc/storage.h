@@ -12,7 +12,7 @@
  * @return Value of byte where address points to
  *
  */
-uint8_t *read_byte(const uint8_t *addr);
+uint8_t read_byte(const uint8_t *addr);
 
 /** @brief Sets byte where address points to
  *

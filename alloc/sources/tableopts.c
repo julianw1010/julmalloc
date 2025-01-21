@@ -73,7 +73,8 @@ int add_map_entry(const uint8_t *m_addr, size_t size) {
 }
 
 int memset_zero(uint8_t *m_addr) {
-    if (!is_segment_beginning(m_addr)) {
+    bool ok = false;
+    if (!is_segment_beginning(m_addr, &ok)) {
         pr_error("Invalid parameters. m_addr %p doesn't point to the "
                  "beginning of allocated space",
                  m_addr);
@@ -91,7 +92,7 @@ int memset_zero(uint8_t *m_addr) {
         i++;
     }
 
-    pr_info("Zeroed %d memory bytes at %p", i, m_addr);
+    pr_info("Zeroed %zu memory bytes at %p", i, m_addr);
     return SUCCESS;
 }
 
@@ -115,13 +116,13 @@ int copy_mem(uint8_t *m_addr_old, uint8_t *m_addr_new, size_t segment_size) {
             pr_error("Memory access violation");
             return ERROR;
         }
-
-        uint8_t *v_old = read_mem_value(m_addr_old + i);
-        if (!v_old) {
+        bool ok = false;
+        uint8_t v_old = read_mem_value(m_addr_old + i, &ok);
+        if (!ok) {
             pr_error("Read error");
             return ERROR;
         }
-        if (set_mem_value(m_addr_new + i, *v_old) == ERROR) {
+        if (set_mem_value(m_addr_new + i, v_old) == ERROR) {
             pr_error("Write error ");
             return ERROR;
         }
@@ -132,15 +133,15 @@ int copy_mem(uint8_t *m_addr_old, uint8_t *m_addr_new, size_t segment_size) {
 }
 
 int remove_map_entry(const uint8_t *m_addr) {
+    bool ok = false;
+    uint8_t mapvalue = read_map_value(m_addr, &ok);
 
-    uint8_t *mapvalue = read_map_value(m_addr);
-
-    if (!mapvalue) {
+    if (!ok) {
         pr_error("Read error");
         return ERROR;
     }
 
-    if (*mapvalue != ALLOCATED_START) {
+    if (mapvalue != ALLOCATED_START) {
         pr_error("Not a beginning of a segment");
         return ERROR;
     }
@@ -151,13 +152,14 @@ int remove_map_entry(const uint8_t *m_addr) {
 
     int i = 1;
     while (m_addr + i < g_mem_end) {
-        uint8_t *mv_consec = read_map_value(m_addr + i);
-        if (!mv_consec) {
+        bool ok = false;
+        uint8_t mv_consec = read_map_value(m_addr + i, &ok);
+        if (!ok) {
             pr_error("Read error");
             return ERROR;
         }
 
-        if (*mv_consec == ALLOCATED_CONSECUTIVE) {
+        if (mv_consec == ALLOCATED_CONSECUTIVE) {
             if (set_map_value(m_addr + i, UNALLLOCATED)) {
                 pr_error("Could not set map value");
                 return ERROR;
@@ -175,14 +177,14 @@ size_t get_heap_used_space() {
     size_t size = 0;
     int i = 0;
     while (g_mem_start + i < g_mem_end) {
-
-        uint8_t *mapvalue = read_map_value(g_mem_start + i);
-        if (!mapvalue) {
+        bool ok = false;
+        uint8_t mapvalue = read_map_value(g_mem_start + i, &ok);
+        if (!ok) {
             pr_error("Read error");
             return 0;
         }
 
-        if (*mapvalue != UNALLLOCATED) {
+        if (mapvalue != UNALLLOCATED) {
             size++;
         }
         i++;
@@ -194,15 +196,16 @@ bool check_heap_integrity() {
     int i = 0;
     bool insegment = false;
     while (g_mem_start + i < g_mem_end) {
-        uint8_t *value = read_map_value(g_mem_start + i);
-        if (!value) {
+        bool ok = false;
+        uint8_t value = read_map_value(g_mem_start + i, &ok);
+        if (!ok) {
             pr_error("Read error");
             return false;
         }
-        if (*value == UNALLLOCATED) {
+        if (value == UNALLLOCATED) {
             insegment = false;
         }
-        if (*value == ALLOCATED_START) {
+        if (value == ALLOCATED_START) {
             insegment = true;
         }
         if (!insegment && value == ALLOCATED_CONSECUTIVE) {
@@ -221,7 +224,8 @@ bool check_mem_zero(uint8_t *addr) {
         return false;
     }
 
-    if (!is_segment_beginning(addr)) {
+    bool ok = false;
+    if (!is_segment_beginning(addr, &ok) | !ok) {
         pr_error("Not beginning of segment");
         return false;
     }
@@ -229,8 +233,9 @@ bool check_mem_zero(uint8_t *addr) {
     size_t size = get_segment_size(addr);
     size_t i = 0;
     while (i < size) {
-        uint8_t *value = read_mem_value(addr + i);
-        if (!value) {
+        bool ok = false;
+        uint8_t value = read_mem_value(addr + i, &ok);
+        if (!ok) {
             pr_error("Read error");
             return false;
         }

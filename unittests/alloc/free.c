@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 
         // Free table
         for (size_t i = 0; i < (size_t)floor(((int)(STORAGE_SIZE / j))); i++) {
-            free(g_mem_start + i * j);
+            free(g_mem_start + (i * j));
 
             if (!check_heap_integrity()) {
                 pr_error("Memory table corrupted");

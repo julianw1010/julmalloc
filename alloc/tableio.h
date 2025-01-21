@@ -24,10 +24,12 @@ int set_map_value(const uint8_t *m_addr, uint8_t v);
  * the validity of the address in the calling function.
  *
  * @param[in] m_addr Valid memory address
- * @return Pointer to value of map entry corresponding to @p addr
+ * @param[in, out] ok Indicator which is false iff. an error while
+ * reading occured.
+ * @return Value of map entry corresponding to @p addr
  *
  */
-uint8_t *read_map_value(const uint8_t *m_addr);
+uint8_t read_map_value(const uint8_t *m_addr, bool *ok);
 
 /** @brief Sets a memory byte
  *
@@ -49,10 +51,12 @@ int set_mem_value(uint8_t *m_addr, uint8_t v);
  * @attention Function will exit on invalid address. Make sure to handle the
  * validity of the address in the calling function.
  * @param[in] m_addr A valid memory address
+ * @param[in, out] ok Indicator which is false iff. an error while
+ * reading occured.
  * @return The stored uint8_t value
  *
  */
-uint8_t *read_mem_value(uint8_t *m_addr);
+uint8_t read_mem_value(uint8_t *m_addr, bool *ok);
 
 /** @brief Get the gap size, that is free space between two allocated segments
  *
@@ -91,10 +95,12 @@ size_t get_segment_size(const uint8_t *m_addr);
  * true, otherwise return false
  *
  * @param[in] addr Valid memory address
+ * @param[in,out] ok Indicator variable which is false iff. processing errors
+ * occured.
  * @return true if addr points to a beginning of unallocated space, false
  * otherwise
  */
-bool is_segment_beginning(const uint8_t *m_addr);
+bool is_segment_beginning(const uint8_t *m_addr, bool *ok);
 
 /** @brief Checks if address points to free segment beginning
  *
