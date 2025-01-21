@@ -74,29 +74,24 @@ int add_map_entry(const uint8_t *m_addr, size_t size) {
 
 int memset_zero(uint8_t *m_addr) {
     if (!is_segment_beginning(m_addr)) {
-        pr_error("Invalid parameters. start doesn't point to the "
-                 "beginning of allocated space");
+        pr_error("Invalid parameters. m_addr %p doesn't point to the "
+                 "beginning of allocated space",
+                 m_addr);
         return ERROR;
     }
 
-    if (set_mem_value(m_addr, UNALLLOCATED)) {
-        pr_error("Could not set mem value");
-        return ERROR;
-    }
+    size_t size = get_segment_size(m_addr);
 
-    int i = 1;
-    while (read_map_value(m_addr + i) == ALLOCATED_CONSECUTIVE) {
-        if (m_addr + i >= g_mem_end) {
-            pr_error("Memory access violation");
-            return ERROR;
-        }
-        if (set_mem_value(m_addr + i, UNALLLOCATED)) {
+    size_t i = 0;
+    while (i < size) {
+        if (set_mem_value(m_addr + i, ZERO)) {
             pr_error("Could not set mem value");
+            return ERROR;
         }
         i++;
     }
 
-    pr_info("Zeroed %d memory bytes", i);
+    pr_info("Zeroed %d memory bytes at %p", i, m_addr);
     return SUCCESS;
 }
 
@@ -179,6 +174,30 @@ bool check_heap_integrity() {
         }
         if (!insegment && value == ALLOCATED_CONSECUTIVE) {
             pr_error("Integrity violation");
+            return false;
+        }
+        i++;
+    }
+    return true;
+}
+
+bool check_mem_zero(uint8_t *addr) {
+
+    if (!is_mem_addr(addr)) {
+        pr_error("Not a memory address");
+        return false;
+    }
+
+    if (!is_segment_beginning(addr)) {
+        pr_error("Not beginning of segment");
+        return false;
+    }
+
+    size_t size = get_segment_size(addr);
+    size_t i = 0;
+    while (i < size) {
+        uint8_t value = read_mem_value(addr + i);
+        if (value != ZERO) {
             return false;
         }
         i++;

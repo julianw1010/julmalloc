@@ -97,4 +97,16 @@ size_t get_heap_used_space();
  */
 void erase_table();
 
+/** @brief Checks if allocated memory is set to zeroes
+ *
+ * This function take the address of a valid allocated memory segments and
+ * checks if all uint8_t bytes are set to zero.
+ *
+ * @param[in] addr Valid memory address pointing to beginning of segment
+ * @return true if addr points to a segment beginning and all memory entries in
+ * segment are ZERO. false otherwise
+ *
+ */
+bool check_mem_zero(uint8_t *addr);
+
 #endif

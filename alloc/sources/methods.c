@@ -84,8 +84,11 @@ void *calloc(size_t nmemb, size_t size) {
         return nullptr;
     }
 
+    pr_info("Valid pointer");
+
     int status = memset_zero(new_a);
 
+    pr_info("Set memory to zero");
     if (status == ERROR) {
         pr_error("memset_zero");
         return NULL;

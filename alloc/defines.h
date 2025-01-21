@@ -34,6 +34,10 @@ enum {
 };
 
 enum {
+    ZERO /**< Memory entry indicating a value of 0 */
+};
+
+enum {
     HIGH_NIBBLE = (1 << 7 | 1 << 6 | 1 << 5 |
                    1 << 4), /**< Bit mask to read get high nibble */
     LOW_NIBBLE =

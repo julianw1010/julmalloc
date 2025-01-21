@@ -53,6 +53,15 @@ int set_mem_value(uint8_t *m_addr, uint8_t v) {
     return SUCCESS;
 }
 
+uint8_t read_mem_value(uint8_t *m_addr) {
+    if (!is_mem_addr(m_addr)) {
+        pr_error("Invalid address");
+        exit(EXIT_FAILURE);
+    }
+
+    return read_byte(m_addr);
+}
+
 size_t get_gap_size(const uint8_t *m_addr, size_t target) {
     if (!is_gap_beginning(m_addr)) {
         pr_error("Not a beginning of a gap");
@@ -74,7 +83,7 @@ size_t get_segment_size(const uint8_t *m_addr) {
         return 0;
     }
     int i = 1;
-    while (m_addr <= g_mem_end &&
+    while (m_addr + i < g_mem_end &&
            read_map_value(m_addr + i) == ALLOCATED_CONSECUTIVE) {
         i++;
     }
