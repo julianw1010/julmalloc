@@ -115,8 +115,13 @@ int copy_mem(uint8_t *m_addr_old, uint8_t *m_addr_new, size_t segment_size) {
             pr_error("Memory access violation");
             return ERROR;
         }
-        if (set_mem_value(m_addr_new + i, read_map_value(m_addr_old + i)) ==
-            ERROR) {
+
+        uint8_t *v_old = read_mem_value(m_addr_old + i);
+        if (!v_old) {
+            pr_error("Read error");
+            return ERROR;
+        }
+        if (set_mem_value(m_addr_new + i, *v_old) == ERROR) {
             pr_error("Write error ");
             return ERROR;
         }
@@ -127,7 +132,15 @@ int copy_mem(uint8_t *m_addr_old, uint8_t *m_addr_new, size_t segment_size) {
 }
 
 int remove_map_entry(const uint8_t *m_addr) {
-    if (read_map_value(m_addr) != ALLOCATED_START) {
+
+    uint8_t *mapvalue = read_map_value(m_addr);
+
+    if (!mapvalue) {
+        pr_error("Read error");
+        return ERROR;
+    }
+
+    if (*mapvalue != ALLOCATED_START) {
         pr_error("Not a beginning of a segment");
         return ERROR;
     }
@@ -137,14 +150,23 @@ int remove_map_entry(const uint8_t *m_addr) {
     }
 
     int i = 1;
-    while (m_addr + i < g_mem_end &&
-           read_map_value(m_addr + i) == ALLOCATED_CONSECUTIVE) {
-        if (set_map_value(m_addr + i, UNALLLOCATED)) {
-            pr_error("Could not set map value");
+    while (m_addr + i < g_mem_end) {
+        uint8_t *mv_consec = read_map_value(m_addr + i);
+        if (!mv_consec) {
+            pr_error("Read error");
+            return ERROR;
         }
-        i++;
-    }
 
+        if (*mv_consec == ALLOCATED_CONSECUTIVE) {
+            if (set_map_value(m_addr + i, UNALLLOCATED)) {
+                pr_error("Could not set map value");
+                return ERROR;
+            }
+            i++;
+        } else {
+            break;
+        }
+    }
     pr_info("Cleared %d map entries", i);
     return SUCCESS;
 }
@@ -153,7 +175,14 @@ size_t get_heap_used_space() {
     size_t size = 0;
     int i = 0;
     while (g_mem_start + i < g_mem_end) {
-        if (read_map_value(g_mem_start + i) != UNALLLOCATED) {
+
+        uint8_t *mapvalue = read_map_value(g_mem_start + i);
+        if (!mapvalue) {
+            pr_error("Read error");
+            return 0;
+        }
+
+        if (*mapvalue != UNALLLOCATED) {
             size++;
         }
         i++;
@@ -165,11 +194,15 @@ bool check_heap_integrity() {
     int i = 0;
     bool insegment = false;
     while (g_mem_start + i < g_mem_end) {
-        uint8_t value = read_map_value(g_mem_start + i);
-        if (value == UNALLLOCATED) {
+        uint8_t *value = read_map_value(g_mem_start + i);
+        if (!value) {
+            pr_error("Read error");
+            return false;
+        }
+        if (*value == UNALLLOCATED) {
             insegment = false;
         }
-        if (value == ALLOCATED_START) {
+        if (*value == ALLOCATED_START) {
             insegment = true;
         }
         if (!insegment && value == ALLOCATED_CONSECUTIVE) {
@@ -196,7 +229,11 @@ bool check_mem_zero(uint8_t *addr) {
     size_t size = get_segment_size(addr);
     size_t i = 0;
     while (i < size) {
-        uint8_t value = read_mem_value(addr + i);
+        uint8_t *value = read_mem_value(addr + i);
+        if (!value) {
+            pr_error("Read error");
+            return false;
+        }
         if (value != ZERO) {
             return false;
         }

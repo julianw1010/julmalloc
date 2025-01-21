@@ -16,6 +16,8 @@
 static bool table_inited = false;
 
 void *malloc(size_t size) {
+
+    pr_info("Allocating with size %zu", size);
     if (!table_inited) {
         init_table();
         table_inited = true;
@@ -104,12 +106,11 @@ void *realloc(void *ptr, size_t size) {
     }
 
     if (size == 0) {
-        pr_warning("size zero. Realloc acts like free");
-        free(ptr);
-        return nullptr;
+        return NULL;
     }
 
     if (!ptr) {
+        pr_warning("ptr iss NULL. realloc acts like malloc");
         void *new_a = malloc(size);
         return new_a;
     }

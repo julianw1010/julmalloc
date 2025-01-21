@@ -6,14 +6,16 @@ add_executable(special_free alloc/special_free.c)
 target_link_libraries(special_free alloc)
 add_executable(calloc alloc/calloc.c)
 target_link_libraries(calloc alloc)
-
+add_executable(realloc alloc/realloc.c)
+target_link_libraries(realloc alloc)
 
 add_test(NAME malloc COMMAND malloc)
 add_test(NAME free COMMAND free)
 add_test(NAME "special_free" COMMAND special_free)
 add_test(NAME calloc COMMAND calloc)
+add_test(NAME realloc COMMAND realloc)
 
-set_property(TEST malloc free "special_free" calloc
+set_property(TEST malloc free "special_free" calloc realloc
    PROPERTY
    ENVIRONMENT LD_PRELOAD=${CMAKE_SOURCE_DIR}/build/alloc/liballoc.so)
 

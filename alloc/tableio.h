@@ -24,10 +24,10 @@ int set_map_value(const uint8_t *m_addr, uint8_t v);
  * the validity of the address in the calling function.
  *
  * @param[in] m_addr Valid memory address
- * @return Value of map entry corresponding to @p addr
+ * @return Pointer to value of map entry corresponding to @p addr
  *
  */
-uint8_t read_map_value(const uint8_t *m_addr);
+uint8_t *read_map_value(const uint8_t *m_addr);
 
 /** @brief Sets a memory byte
  *
@@ -52,7 +52,7 @@ int set_mem_value(uint8_t *m_addr, uint8_t v);
  * @return The stored uint8_t value
  *
  */
-uint8_t read_mem_value(uint8_t *m_addr);
+uint8_t *read_mem_value(uint8_t *m_addr);
 
 /** @brief Get the gap size, that is free space between two allocated segments
  *

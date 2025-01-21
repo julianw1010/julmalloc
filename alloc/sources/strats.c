@@ -13,8 +13,13 @@ uint8_t *worst_fit(size_t size) { return g_mem_start; }
 uint8_t *first_fit(size_t size) {
     uint8_t *iterator = g_mem_start;
     while (iterator < g_mem_end) {
-        if (read_map_value(iterator) != UNALLLOCATED) {
-            pr_warning("Map entry at %p is NOT UNALLLOCATED", iterator);
+        uint8_t *value = read_map_value(iterator);
+        if (!value) {
+            pr_error("Read error");
+            return nullptr;
+        }
+        if (*value != UNALLLOCATED) {
+            // pr_warning("Map entry at %p is NOT UNALLLOCATED", iterator);
             iterator++;
             continue;
         }
