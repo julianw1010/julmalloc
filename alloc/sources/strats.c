@@ -18,7 +18,10 @@ uint8_t *worst_fit(size_t size, uint8_t *ignore) {
         size_t gap_size = get_gap_size(g_mem_start + i, size, ignore);
         if (gap_size > largest_gap) {
             pr_info("Found gap at %p of size %zu", g_mem_start + i, size);
-            largest_gap = gap_size
+            largest_gap = gap_size;
+            i += largest_gap;
+            lg_addr = g_mem_start + i;
+            continue;
         }
         i++;
     }
