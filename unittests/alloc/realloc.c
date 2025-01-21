@@ -49,7 +49,7 @@ static int specialcases() {
 // then shrinks them all by one with each loop till each element has size 1.
 // Each loop the function checks if the total allocated size shrunk by 1, and if
 // the heap is still consistent
-static int testshrink() {
+static int simpleshrink() {
     erase_table();
 
     for (size_t j = 1; j <= STORAGE_SIZE; j++) {
@@ -77,11 +77,11 @@ static int testshrink() {
                 return EXIT_FAILURE;
             }
 
-            size_t numreducts = ceil((j / l)) - 1;
+            size_t numreducts = (size_t)ceil(((int)(j / l))) - 1;
             for (size_t k = 1; k <= numreducts; k++) {
 
                 for (size_t i = 0; i < n_maxentries; i++) {
-                    if (!realloc(g_mem_start + i * j, j - l * k)) {
+                    if (!realloc(g_mem_start + (i * j), j - (l * k))) {
                         pr_error("Realloc failed");
                         return EXIT_FAILURE;
                     }
@@ -93,7 +93,7 @@ static int testshrink() {
                 }
 
                 size_t sizemes = get_heap_used_space();
-                size_t newsize = (j - l * k) * n_maxentries;
+                size_t newsize = (j - (l * k)) * n_maxentries;
                 if (sizemes != newsize) {
                     pr_error(
                         "Memory size %zu Allocated memory size mismatch for "
@@ -112,4 +112,38 @@ static int testshrink() {
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[]) { return specialcases() || testshrink(); }
+static int simpleexpand() {
+    erase_table();
+
+    for (size_t i = 1; i < STORAGE_SIZE; i++) {
+        pr_info("%zu elements", i);
+        size_t max_size = (size_t)floor(((int)(STORAGE_SIZE / i)));
+        for (size_t j = 0; j < i; j++) {
+            add_map_entry(g_mem_start + (max_size * j), 1);
+            if (!check_heap_integrity()) {
+                pr_error("Memory table corrupted");
+                return EXIT_FAILURE;
+            }
+        }
+
+        for (size_t j = 2; j <= max_size; j++) {
+            for (size_t k = 0; k < i; k++) {
+                if (!realloc(g_mem_start + (max_size * k), j)) {
+                    pr_error("Realloc failed");
+                    return EXIT_FAILURE;
+                }
+
+                if (!check_heap_integrity()) {
+                    pr_error("Memory table corrupted");
+                    return EXIT_FAILURE;
+                }
+            }
+        }
+        erase_table();
+    }
+
+    erase_table();
+    return EXIT_SUCCESS;
+}
+
+int main(int argc, char *argv[]) { return specialcases() || simpleexpand(); }

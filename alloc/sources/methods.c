@@ -125,6 +125,8 @@ void *realloc(void *ptr, size_t size) {
 
     size_t old_size = get_segment_size(ptr);
 
+    pr_info("Old size: %zu New size: %zu", old_size, size);
+
     if (old_size == 0) {
         pr_warning("Invalid pointer");
         return nullptr;
@@ -152,7 +154,8 @@ void *realloc(void *ptr, size_t size) {
     }
 
     // size > old_size.
-    if (old_size + get_gap_size((uint8_t *)ptr + 1, size, nullptr) <= size) {
+    if (get_gap_size((uint8_t *)ptr + old_size, size - old_size, nullptr) >=
+        size - old_size) {
         size_t i = 0;
         while (old_size + i < size) {
             int status =
@@ -161,6 +164,7 @@ void *realloc(void *ptr, size_t size) {
                 pr_error("Could not expand space");
                 return nullptr;
             }
+            i++;
         }
 
         return ptr;

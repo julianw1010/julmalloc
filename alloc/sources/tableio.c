@@ -104,7 +104,7 @@ size_t get_gap_size(const uint8_t *m_addr, size_t target, uint8_t *ignore) {
 }
 
 size_t get_segment_size(const uint8_t *m_addr) {
-    bool ok = false;
+    bool ok = true;
     if (!is_segment_beginning(m_addr, &ok) || !ok) {
         pr_error("Invalid arguments");
         return 0;
@@ -127,6 +127,7 @@ size_t get_segment_size(const uint8_t *m_addr) {
 }
 
 bool is_segment_beginning(const uint8_t *m_addr, bool *ok) {
+    *ok = true;
     uint8_t value = read_map_value(m_addr, ok);
 
     if (!*ok) {
@@ -134,7 +135,12 @@ bool is_segment_beginning(const uint8_t *m_addr, bool *ok) {
         return false;
     }
 
-    return value == ALLOCATED_START;
+    if (value != ALLOCATED_START) {
+        pr_warning("Not segment beginning");
+        return false;
+    }
+
+    return true;
 }
 
 bool is_map_addr(const uint8_t *p_addr) {
