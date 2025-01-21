@@ -25,8 +25,13 @@ uint8_t *worst_fit(size_t size, uint8_t *ignore) {
         }
         i++;
     }
-    pr_warning("Reached end of loop without a gap found. Storage is full");
-    return lg_addr;
+
+    if (largest_gap >= size) {
+        return lg_addr;
+    }
+
+    pr_warning("Did not find a gap. Storage is full");
+    return nullptr;
 }
 
 uint8_t *first_fit(size_t size, uint8_t *ignore) {
