@@ -6,45 +6,65 @@
 #define ALLOC_DEFINES_H
 
 #include "alloc/types.h"
+#include "alloc/utils.h"
 #include <math.h>
 #include <stdint.h>
+#include <stdio.h>
 
-extern uint8_t *g_map_start; /**< Address of start of map area inclusive */
-extern uint8_t *g_map_end;   /**< Address of end of map area exclusive*/
-extern uint8_t *g_mem_start; /**< Address of start of memory area inclusive */
-extern uint8_t *g_mem_end;   /**< Address of end of memory area exclusive */
-extern alloc_function g_alloc_function; /**< Function pointer  */
+//! The storage will only be expanded in segments of PAGE_SIZE to avoid frequent
+//! brk/sbrk calls.
+#define PAGE_SIZE 4096
 
-#define HEAP_SIZE                                                              \
-    (size_t)10 /**< Size of heap including map table and memory area */
-#define TABLE_SIZE                                                             \
-    (size_t)floor(                                                             \
-        ((double)1 / 3) *                                                      \
-        (HEAP_SIZE)) /**< Size of floor, one third of the total size */
-#define STORAGE_SIZE                                                           \
-    (2 *                                                                       \
-     TABLE_SIZE) /**< Size of the memory area, two thirds of the total size */
+// The storage addresses need to be aligned. This macro contains the largest
+// align supported by the OS for some data type. According to the malloc()
+// definition in C23, addresses returned by malloc() need to be "suitably
+// aligned", which we interpret as they need to be aligned to a multiple equal
+// or larger than _Alignof(max_align_t). All returned addresses by malloc will
+// be aligned to ALIGNMENT, that is (intptr_t)malloc(...) % ALIGNMENT == 0
 
-enum {
-    UNALLOCATED = 0x0, /**< Map entry indicating unallocated space */
+// Note this value is only used for checking on 64 bit. The alignments are
+// hardcoded for 64 bit (16 byte) for simplicity. Since the alignments for
+// 64-bit are larger than for 32-bit anyways due to larger primitive data types,
+// this is not problematic.
+#define ALIGNMENT _Alignof(max_align_t)
 
-    ALLOCATED_START =
-        0x1, /**< Map entry indicating beginning of allocated space */
-    ALLOCATED_CONSECUTIVE = 0xf /**< Map entry indicating allocated space bigger
-                    than 1, following ALLOCATED_START always */
-};
+//! Macro for LD_PRELOAD asserts because normal assert somehow don't work
+#define ASSERT(expr)                                                           \
+    if (!(expr)) {                                                             \
+        a_abort(__FILE__, __LINE__, #expr);                                    \
+    }
 
-enum {
-    ZERO /**< Memory entry indicating a value of 0 */
-};
+// ERROR define for returns
+#define ERROR -1
 
-enum {
-    HIGH_NIBBLE = (1 << 7 | 1 << 6 | 1 << 5 |
-                   1 << 4), /**< Bit mask to read get high nibble */
-    LOW_NIBBLE =
-        (1 << 3 | 1 << 2 | 1 << 1 | 1 << 0), /**< Bit mask to read low nibble */
-    HIGH_NIBBLE_OFFSET = 4, /**<Bit shift to properly read high nibble */
-    LOW_NIBBLE_OFFSET = 0   /**<Bit shift to properly read low nibble */
-};
+// SUCCESS define for returns
+#define SUCCESS 0
+
+//! ANSI control sequence to reset foreground color.
+#define ANSI_RESET "\x1b[0m"
+//! ANSI color code for red.
+#define ANSI_RED "\x1b[0;31m"
+//! ANSI color code for yellow.
+#define ANSI_YELLOW "\x1b[0;33m"
+//! ANSI color code for green.
+#define ANSI_GREEN "\x1b[0;32m"
+//! ANSI color code for blue.
+#define ANSI_BLUE "\x1b[0;34m"
+
+//! Various output macros
+#define pr_error(format, ...)                                                  \
+    (fprintf(stderr, ANSI_RED "[ERROR] (%s:%d) %s:" format ANSI_RESET "\n",    \
+             __FILE__, __LINE__, __func__ __VA_OPT__(, ) __VA_ARGS__))
+#ifdef NDEBUG
+#define pr_warning(format, ...) ((void)0)
+#define pr_info(format, ...) ((void)0)
+#else
+#define pr_warning(format, ...)                                                \
+    (fprintf(stderr, ANSI_YELLOW "[WARN] (%s:%d) %s:" format ANSI_RESET "\n",  \
+             __FILE__, __LINE__, __func__ __VA_OPT__(, ) __VA_ARGS__))
+#define pr_info(format, ...)                                                   \
+    (fprintf(stderr, ANSI_GREEN "[INFO] (%s:%d) %s:" format ANSI_RESET "\n",   \
+             __FILE__, __LINE__, __func__ __VA_OPT__(, ) __VA_ARGS__))
+#endif
 
 #endif

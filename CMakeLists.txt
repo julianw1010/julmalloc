@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.28.2)
-
 project(julmalloc LANGUAGES C VERSION 1.0.0 DESCRIPTION "julmalloc")
 
-add_compile_options(-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable -std=gnu23 -lm)
+add_compile_options(-Wall -Wextra -Wno-unused-variable -std=gnu23)
 include(CTest)
 
 install(CODE "
@@ -11,30 +10,7 @@ install(CODE "
   message(STATUS \"CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}\")
 ")
 
-set(CMAKE_C_CLANG_TIDY "clang-tidy")
-set(CMAKE_DEBUG_POSTFIX d)
+include_directories(".")
 
 add_subdirectory(alloc)
 add_subdirectory(unittests)
-add_subdirectory(programs)
-
-# Additional targets to perform clang-format/clang-tidy
-# Get all project files
-file(GLOB_RECURSE
-    ALL_C_SOURCE_FILES
-    *.[chi]
-)
-
-# Adding clang-format target if executable is found
-find_program(CLANG_FORMAT "clang-format")
-if(CLANG_FORMAT)
-    add_custom_target(
-        clang-format
-        COMMAND clang-format
-        -i
-        -style=file
-        ${ALL_C_SOURCE_FILES}
-    )
-endif()
-
-set_target_properties(testclient editorclient server PROPERTIES DEBUG_POSTFIX "d")

@@ -1,7 +1,6 @@
 #include "alloc/defines.h"
 #include "alloc/methods.h"
-#include "alloc/tableopts.h"
-#include "core/defines.h"
+
 #include "math.h"
 #include <stdlib.h>
 
@@ -10,14 +9,17 @@ int main(int argc, char *argv[]) {
 
     // Test freeing of nullptr. Should continue without modifying pointer.
     void *ptr = nullptr;
+
     free(ptr);
 
     if (ptr) {
+
         pr_error("Pointer has been modified");
+
         return EXIT_SUCCESS;
     }
 
-    free(g_mem_start);
+    free((void *)1);
 
     return EXIT_SUCCESS;
 }

@@ -1,43 +1,26 @@
-#include "alloc/defines.h"
-#include "alloc/methods.h"
-#include "alloc/tableopts.h"
-#include "core/defines.h"
-#include "math.h"
+#include "unittests/defines.h"
+#include <alloc/defines.h>
+
 #include <stdlib.h>
 
-int main(int argc, char *argv[]) {
+bool is_aligned(void *ptr) { return (uintptr_t)ptr % ALIGNMENT == 0; }
 
-    if (malloc(0)) {
-        pr_error("Not null pointer");
-        return EXIT_FAILURE;
-    }
+int main() {
+    uint8_t *array[STORAGE_SIZE_TESTING];
+    uint8_t *anchor = malloc(1);
+    free(anchor);
 
-    for (size_t j = 1; j <= STORAGE_SIZE; j++) {
-        // Fill table
-        for (size_t i = 0; i < (size_t)floor(((int)(STORAGE_SIZE / j))); i++) {
-            if (!malloc(j)) {
-                return EXIT_FAILURE;
-            }
-
-            if (!check_heap_integrity()) {
-                pr_error("Memory table corrupted");
+    for (int i = 1; i <= STORAGE_SIZE_TESTING; i++) {
+        for (int j = 0; j < STORAGE_SIZE_TESTING / i; i++) {
+            array[i] = malloc(i);
+            if (!is_aligned(array[i])) {
                 return EXIT_FAILURE;
             }
         }
-
-        // Check if heap is filled
-        if (get_heap_used_space() !=
-            (size_t)floor((int)(STORAGE_SIZE / j)) * j) {
-            pr_error("Allocated memory size discrepancy");
-            return EXIT_FAILURE;
+        size_t step_size = array[0] - array[1];
+        for (int j = 0; j < STORAGE_SIZE_TESTING / i; i++) {
+            free(anchor + j * step_size);
         }
-
-        // Try to allocate full table
-        if (malloc(j)) {
-            pr_error("Memory allocated despite table full");
-            return EXIT_FAILURE;
-        }
-        erase_table();
     }
 
     return EXIT_SUCCESS;

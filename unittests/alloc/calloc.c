@@ -1,124 +1,43 @@
-#include "alloc/defines.h"
-#include "alloc/methods.h"
-#include "alloc/tableio.h"
-#include "alloc/tableopts.h"
-#include "core/defines.h"
-#include "math.h"
+#include "unittests/defines.h"
+#include <alloc/defines.h>
+
 #include <stdlib.h>
-#include <time.h>
 
-int main(int argc, char *argv[]) {
+bool is_aligned(void *ptr) { return (uintptr_t)ptr % ALIGNMENT == 0; }
 
-    if (calloc(0, 0) || calloc(0, 1) || calloc(1, 0)) {
-        pr_error("Not null pointer");
-        return EXIT_FAILURE;
+static bool is_empty(uint8_t *addr, size_t size) {
+    pr_info("Checking is storage is empty");
+    for (size_t i = 0; i < size; i++) {
+        if (*(addr + i) != 0) {
+            pr_error("Not zero!!! Urgently check your implementation");
+            return false;
+        }
+        pr_info("Checked byte %zu", i);
     }
+    return true;
+}
 
-    for (size_t j = 1; j <= STORAGE_SIZE; j++) {
-        // Fill table
-        for (size_t i = 0; i < (size_t)floor(((int)(STORAGE_SIZE / j))); i++) {
-            uint8_t *addr = calloc(1, j);
-            if (!addr) {
+int main() {
+    uint8_t *array[STORAGE_SIZE_TESTING];
+    uint8_t *anchor = malloc(1);
+    free(anchor);
+
+    for (int i = 1; i <= STORAGE_SIZE_TESTING; i++) {
+        for (int j = 0; j < STORAGE_SIZE_TESTING / i; i++) {
+            pr_info("Allocating elements of size i");
+            array[i] = malloc(i);
+            if (!is_empty(array[i], i)) {
                 return EXIT_FAILURE;
             }
-
-            if (!check_heap_integrity()) {
-                pr_error("Memory table corrupted");
+            if (!is_aligned(array[i])) {
                 return EXIT_FAILURE;
             }
-
-            pr_info("Memory table ok");
-
-            if (!check_mem_zero(addr)) {
-                pr_error("Allocated memory not zero");
-                return EXIT_FAILURE;
-            }
-
-            pr_info("Memory zero");
         }
 
-        // Check if heap is filled
-        if (get_heap_used_space() !=
-            (size_t)floor((int)(STORAGE_SIZE / j)) * j) {
-            pr_error("Allocated memory size discrepancy");
-            return EXIT_FAILURE;
+        size_t step_size = array[0] - array[1];
+        for (int j = 0; j < STORAGE_SIZE_TESTING / i; i++) {
+            free(anchor + j * step_size);
         }
-
-        // Try to allocate full table
-        if (calloc(1, j)) {
-            pr_error("Memory allocated despite table full");
-            return EXIT_FAILURE;
-        }
-        erase_table();
-    }
-
-    erase_table();
-
-    for (size_t j = 1; j <= STORAGE_SIZE; j++) {
-        // Fill table
-        for (size_t i = 0; i < (size_t)floor(((int)(STORAGE_SIZE / j))); i++) {
-            uint8_t *addr = calloc(j, 1);
-            if (!addr) {
-                return EXIT_FAILURE;
-            }
-
-            if (!check_heap_integrity()) {
-                pr_error("Memory table corrupted");
-                return EXIT_FAILURE;
-            }
-
-            pr_info("Memory table ok");
-
-            if (!check_mem_zero(addr)) {
-                pr_error("Allocated memory not zero");
-                return EXIT_FAILURE;
-            }
-
-            pr_info("Memory zero");
-        }
-
-        // Check if heap is filled
-        if (get_heap_used_space() !=
-            (size_t)floor((int)(STORAGE_SIZE / j)) * j) {
-            pr_error("Allocated memory size discrepancy");
-            return EXIT_FAILURE;
-        }
-
-        // Try to allocate full table
-        if (calloc(j, 1)) {
-            pr_error("Memory allocated despite table full");
-            return EXIT_FAILURE;
-        }
-        erase_table();
-    }
-
-    erase_table();
-
-    srand(time(nullptr));
-
-    // Check random calloc
-    for (size_t i = 0; i < STORAGE_SIZE; i++) {
-
-        size_t number1 = (rand() % (STORAGE_SIZE - 1)) + 1;
-        size_t number2 = (rand() % (STORAGE_SIZE - 1)) + 1;
-
-        if (number1 * number2 >= STORAGE_SIZE) {
-            continue;
-        }
-
-        uint8_t *addr = calloc(number1, number2);
-
-        if (get_segment_size(addr) != number1 * number2) {
-            pr_error("calloc size mismatch");
-            EXIT_FAILURE;
-        }
-
-        if (!check_mem_zero(addr)) {
-            pr_error("Not zero");
-            EXIT_FAILURE;
-        }
-
-        erase_table();
     }
 
     return EXIT_SUCCESS;
