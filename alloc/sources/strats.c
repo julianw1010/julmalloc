@@ -31,15 +31,10 @@ uint8_t *best_fit(seg_list_head_s *list, size_t size) {
         return nullptr;
     }
     if (!list->first_seg) {
-        // //pr_info("List is empty, maybe there is storage left though");
-        int free_size = (uint8_t *)list->end_addr -
-                        ((uint8_t *)list + sizeof(struct seg_list_head_s));
-        if (free_size >= (int)total_size) {
-            return (uint8_t *)list + sizeof(struct seg_list_head_s);
-        }
-        // //pr_info("Storage not large enough, consider expanding");
+        // pr_info("List empty");
         return nullptr;
     }
+
     int startgapsize = (uint8_t *)list->first_seg -
                        ((uint8_t *)list + sizeof(struct seg_list_head_s));
     uint8_t *best_gap_addr = nullptr;
@@ -85,18 +80,13 @@ uint8_t *worst_fit(seg_list_head_s *list, size_t size) {
     size_t total_size =
         sizeof(struct seg_head_s) + effective_size + sizeof(struct seg_tail_s);
 
+    // //pr_info("Allocating size %zu", total_size);
     if (!list->end_addr) {
         pr_error("Sorry, list not initialized");
         return nullptr;
     }
     if (!list->first_seg) {
-        // //pr_info("List is empty, maybe there is storage left though");
-        int free_size = (uint8_t *)list->end_addr -
-                        ((uint8_t *)list + sizeof(struct seg_list_head_s));
-        if (free_size >= (int)total_size) {
-            return (uint8_t *)list + sizeof(struct seg_list_head_s);
-        }
-
+        // pr_info("List empty");
         return nullptr;
     }
 
@@ -149,22 +139,16 @@ uint8_t *first_fit(seg_list_head_s *list, size_t size) {
     size_t total_size =
         sizeof(struct seg_head_s) + effective_size + sizeof(struct seg_tail_s);
 
+    // //pr_info("Allocating size %zu", total_size);
     if (!list->end_addr) {
         pr_error("Sorry, list not initialized");
         return nullptr;
     }
     if (!list->first_seg) {
-        // //pr_info("List is empty, maybe there is storage left though");
-        int free_size =
-            (uint8_t *)list->end_addr - ((uint8_t *)list + sizeof(*list));
-        if (free_size >= (int)total_size) {
-            // //pr_info("Found a gap of size %d at %zu", free_size,
-            //            (size_t)((uint8_t *)list + sizeof(*list)));
-            return (uint8_t *)list + sizeof(*list);
-        }
-
+        // pr_info("List empty");
         return nullptr;
     }
+
     int startgapsize = (uint8_t *)list->first_seg -
                        ((uint8_t *)list + sizeof(struct seg_list_head_s));
 
@@ -209,8 +193,13 @@ uint8_t *next_fit(seg_list_head_s *list, size_t size) {
     size_t total_size =
         sizeof(struct seg_head_s) + effective_size + sizeof(struct seg_tail_s);
 
+    // //pr_info("Allocating size %zu", total_size);
     if (!list->end_addr) {
         pr_error("Sorry, list not initialized");
+        return nullptr;
+    }
+    if (!list->first_seg) {
+        // pr_info("List empty");
         return nullptr;
     }
 
