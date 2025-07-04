@@ -5,6 +5,7 @@
 #include "unittests/defines.h"
 #include <stdlib.h>
 
+
 bool is_aligned(void *ptr) { return (uintptr_t)ptr % ALIGNMENT == 0; }
 
 size_t sum_aligned(size_t num_gaps) {
@@ -27,12 +28,12 @@ size_t sum_aligned(size_t num_gaps) {
 // 1
 // If next_fit works correctly, the proper gap should be allocated
 int grid_test_simple() {
+    
     set_alloc_function(FIRST_FIT);
     size_t num_gaps = 0;
     uint8_t *anchor = malloc(1);
+    anchor += 1*ALIGNMENT + sizeof(struct seg_tail_s);
     ASSERT(is_aligned(anchor));
-    free(anchor);
-    anchor -= sizeof(struct seg_head_s);
 
     // Measure maximum number of gaps. The last gap has to be strictly larger
     // than the previous ones
@@ -51,7 +52,7 @@ int grid_test_simple() {
         uint8_t *barrier = malloc(1);
         ASSERT(is_aligned(segments[i]) && is_aligned(barrier));
 
-        pr_info("%d", barrier - segments[i]);
+        pr_info("" FMT_UINTPTR, (intptr_t)(barrier - segments[i]));
         ASSERT(barrier == segments[i] + round_up(i + 1, ALIGNMENT) +
                               sizeof(struct seg_head_s) +
                               sizeof(struct seg_tail_s))

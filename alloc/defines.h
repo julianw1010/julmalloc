@@ -10,6 +10,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 //! The storage will only be expanded in segments of PAGE_SIZE to avoid frequent
 //! brk/sbrk calls.
@@ -58,6 +59,8 @@
 #define ANSI_GREEN "\x1b[0;32m"
 //! ANSI color code for blue.
 #define ANSI_BLUE "\x1b[0;34m"
+
+#define FMT_UINTPTR "%" PRIuPTR
 
 //! Various output macros
 #define pr_error(format, ...)                                                  \

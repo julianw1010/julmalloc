@@ -27,33 +27,43 @@ size_t sum_aligned(size_t num_gaps) {
 // 1
 // If first_fit works correctly, the first fitting gap should be allocated
 int grid_test() {
-    size_t num_gaps = 0;
+
     uint8_t *anchor = malloc(1);
+    anchor += 1*ALIGNMENT + sizeof(struct seg_tail_s);
     ASSERT(is_aligned(anchor));
-    free(anchor);
-    anchor -= sizeof(struct seg_head_s);
+
+    for (size_t j = PAGE_SIZE; j <= STORAGE_SIZE_TESTING ; j*=2) {
+
+    size_t num_gaps = 0;
+
+    size_t aligned_storage_s = (j - j%ALIGNMENT)*PAGE_SIZE;
 
     // Measure maximum number of gaps. The last gap has to be strictly larger
     // than the previous ones
     while (sum_aligned(num_gaps + 1) + num_gaps * ALIGNMENT +
                (2 * num_gaps + 1) *
                    (sizeof(struct seg_head_s) + sizeof(struct seg_tail_s)) <=
-           STORAGE_SIZE_TESTING) {
+           aligned_storage_s) {
         num_gaps++;
     }
 
+    if(num_gaps == 0) {
+        continue;
+    }
+
     uint8_t *segments[num_gaps];
+    
+    uint8_t *barriers[num_gaps-1];
 
     // Add "barriers between gaps"
     for (size_t i = 0; i < num_gaps - 1; i++) {
         segments[i] = malloc(i + 1);
         uint8_t *barrier = malloc(1);
+        barriers[i] = barrier;
         ASSERT(is_aligned(segments[i]) && is_aligned(barrier));
 
-        pr_info("%d", barrier - segments[i]);
-        ASSERT(barrier == segments[i] + round_up(i + 1, ALIGNMENT) +
-                              sizeof(struct seg_head_s) +
-                              sizeof(struct seg_tail_s))
+        pr_info("" FMT_UINTPTR, barrier - segments[i]);
+        pr_info("Gaps: %zu, i: %zu, j: %zu", num_gaps, i, j);
         ASSERT(segments[i] ==
                (uint8_t *)anchor + (sum_aligned(i) + i * ALIGNMENT +
                                     (2 * i) * (sizeof(struct seg_head_s) +
@@ -64,6 +74,10 @@ int grid_test() {
                                     (2 * i + 1) * (sizeof(struct seg_head_s) +
                                                    sizeof(struct seg_tail_s)) +
                                     sizeof(struct seg_head_s)));
+        ASSERT(barrier == segments[i] + round_up(i + 1, ALIGNMENT) +
+                              sizeof(struct seg_head_s) +
+                              sizeof(struct seg_tail_s));
+
     }
 
     segments[num_gaps - 1] = malloc(num_gaps);
@@ -79,6 +93,8 @@ int grid_test() {
         free(segments[i]);
     }
 
+    uint8_t *addrs[num_gaps];
+
     // Allocate num_gaps many elements of ascending size and check if they
     // land in the right grid
     for (size_t i = 0; i < num_gaps; i++) {
@@ -89,8 +105,19 @@ int grid_test() {
                                                sizeof(struct seg_tail_s)) +
                                     sizeof(struct seg_head_s)));
         ASSERT(is_aligned(addr));
+        addrs[i] = addr;
         // free(addr);
     }
+
+    for (size_t i = 0; i < num_gaps - 1; i++) {
+        free(barriers[i]);
+    }
+
+    for (size_t i = 0; i < num_gaps; i++) {
+        free(addrs[i]);
+    }
+
+}
 
     return EXIT_SUCCESS;
 }

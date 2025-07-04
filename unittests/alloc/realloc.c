@@ -8,6 +8,9 @@ bool is_aligned(void *ptr) { return (uintptr_t)ptr % ALIGNMENT == 0; }
 int main() {
     uint8_t *addr = malloc(STORAGE_SIZE_TESTING);
     uint8_t *addr2 = malloc(STORAGE_SIZE_TESTING);
+    if (!is_aligned(addr) || !is_aligned(addr2)) {
+            return EXIT_FAILURE;
+    }
 
     if (!addr) {
         return EXIT_FAILURE;
@@ -21,9 +24,6 @@ int main() {
             pr_error("Invalid realloc");
             return EXIT_FAILURE;
         }
-        if (!is_aligned(addr) || !is_aligned(addr2)) {
-            return EXIT_FAILURE;
-        }
     }
 
     for (size_t i = 2; i <= STORAGE_SIZE_TESTING; i++) {
@@ -33,9 +33,6 @@ int main() {
         }
         if (realloc(addr2, i) != addr2) {
             pr_error("Invalid realloc");
-            return EXIT_FAILURE;
-        }
-        if (!is_aligned(addr) || !is_aligned(addr2)) {
             return EXIT_FAILURE;
         }
     }

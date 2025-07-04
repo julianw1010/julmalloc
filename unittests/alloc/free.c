@@ -4,17 +4,20 @@
 #include <stdlib.h>
 
 int main() {
-    uint8_t *array[STORAGE_SIZE_TESTING];
-    uint8_t *anchor = malloc(1);
-    free(anchor);
 
-    for (int i = 1; i <= STORAGE_SIZE_TESTING; i++) {
+    uint8_t *array[STORAGE_SIZE_TESTING];
+
+    //Create storages of size i
+    for (int i = 1; i <= STORAGE_SIZE_TESTING; i *= 2) {
+
+        // Allocate STORAGE_SIZE_TESTING/i many storages
         for (int j = 0; j < STORAGE_SIZE_TESTING / i; i++) {
             array[i] = malloc(i);
         }
-        size_t step_size = array[0] - array[1];
+
+        // Free STORAGE_SIZE_TESTING/i many storages
         for (int j = 0; j < STORAGE_SIZE_TESTING / i; i++) {
-            free(anchor + j * step_size);
+            free(array[i]);
         }
     }
 

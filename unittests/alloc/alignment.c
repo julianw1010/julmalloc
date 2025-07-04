@@ -1,5 +1,6 @@
 #include "unittests/defines.h"
 #include <alloc/defines.h>
+#include <inttypes.h>
 
 #include <stdlib.h>
 
@@ -7,7 +8,7 @@ int main() {
     uintptr_t offset;
     for (int i = 0; i < 1000; i++) {
         if ((offset = (uintptr_t)malloc(i) % ALIGNMENT)) {
-            pr_error("Invalid alignment %d %zu", offset, ALIGNMENT);
+            pr_error("Invalid alignment " FMT_UINTPTR " %zu", (uintptr_t)offset, (size_t)ALIGNMENT);
             return EXIT_FAILURE;
         }
     }

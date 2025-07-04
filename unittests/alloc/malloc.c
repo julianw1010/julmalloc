@@ -8,7 +8,8 @@ bool is_aligned(void *ptr) { return (uintptr_t)ptr % ALIGNMENT == 0; }
 int main() {
     uint8_t *array[STORAGE_SIZE_TESTING];
     uint8_t *anchor = malloc(1);
-    free(anchor);
+    anchor -= sizeof(struct seg_head_s);
+    ASSERT(is_aligned(anchor));
 
     for (int i = 1; i <= STORAGE_SIZE_TESTING; i++) {
         for (int j = 0; j < STORAGE_SIZE_TESTING / i; i++) {

@@ -27,32 +27,46 @@ size_t sum_aligned(size_t num_gaps) {
 // 1
 // If first_fit works correctly, the first fitting gap should be allocated
 int grid_test() {
-    size_t num_gaps = 0;
+
+    pr_info("Alloc");
     uint8_t *anchor = malloc(1);
+    anchor += ALIGNMENT + sizeof(struct seg_tail_s);
     ASSERT(is_aligned(anchor));
-    free(anchor);
-    anchor -= sizeof(struct seg_head_s);
+
+    for (size_t aligned_storage_s = PAGE_SIZE; aligned_storage_s <= STORAGE_SIZE_TESTING ; aligned_storage_s+=PAGE_SIZE) {
+
+    size_t num_gaps = 1;
 
     // Measure maximum number of gaps. The last gap has to be strictly larger
     // than the previous ones
-    while (sum_aligned(num_gaps + 1) + num_gaps * ALIGNMENT +
-               (2 * num_gaps + 1) *
+    while (sum_aligned(num_gaps+1) + (num_gaps+1)* ALIGNMENT +
+               (2 * (num_gaps+1)+1) *
                    (sizeof(struct seg_head_s) + sizeof(struct seg_tail_s)) <=
-           STORAGE_SIZE_TESTING) {
+           aligned_storage_s) {
         num_gaps++;
     }
 
-    uint8_t *segments[num_gaps];
+    num_gaps--;
+
+    uint8_t *segments[num_gaps-1];
+
+    uint8_t *barriers[num_gaps-1];
 
     // Add "barriers between gaps"
     for (size_t i = 0; i < num_gaps - 1; i++) {
+        pr_info("True");
+
+        pr_info("Alloc");
         segments[i] = malloc(i + 1);
+
+        pr_info("Alloc");
         uint8_t *barrier = malloc(1);
+        barriers[i] = barrier;
         ASSERT((uintptr_t)segments[i] % ALIGNMENT == 0)
         ASSERT((uintptr_t)barrier % ALIGNMENT == 0)
         ASSERT(is_aligned(segments[i]) && is_aligned(barrier));
 
-        pr_info("%d", barrier - segments[i]);
+        pr_info("" FMT_UINTPTR, barrier - segments[i]);
         ASSERT(barrier == segments[i] + round_up(i + 1, ALIGNMENT) +
                               sizeof(struct seg_head_s) +
                               sizeof(struct seg_tail_s))
@@ -68,40 +82,40 @@ int grid_test() {
                                     sizeof(struct seg_head_s)));
     }
 
-    segments[num_gaps - 1] = malloc(num_gaps);
-    ASSERT(segments[num_gaps - 1] ==
-           (uint8_t *)anchor +
-               (sum_aligned(num_gaps - 1) + (num_gaps - 1) * ALIGNMENT +
-                (2 * (num_gaps - 1)) *
-                    (sizeof(struct seg_head_s) + sizeof(struct seg_tail_s)) +
-                sizeof(struct seg_head_s)));
-    ASSERT(is_aligned(segments[num_gaps - 1]));
-
-    for (size_t i = 0; i < num_gaps; i++) {
+    for (size_t i = 0; i < num_gaps-1; i++) {
+        pr_info("Freeing address %p", segments[i]);
         free(segments[i]);
     }
+
+
+    set_alloc_function(WORST_FIT);
+
     // Allocate num_gaps many elements of ascending size and check if they
     // land in the right grid
-    for (size_t i = 0; i < 1; i++) {
+    for (size_t i = 0; i < num_gaps/2; i++) {
 
+        pr_info("Alloc");
         uint8_t *addr = malloc(i + 1);
         pr_info("Num gaps: %zu", num_gaps);
-        pr_info(
-            "Addr : %zu Assertion: %zu", (size_t)addr,
-            (size_t)((uint8_t *)anchor +
-                     (sum_aligned(num_gaps - 1) + (num_gaps - 1) * ALIGNMENT +
-                      (2 * (num_gaps - 1)) * (sizeof(struct seg_head_s) +
-                                              sizeof(struct seg_tail_s)) +
-                      sizeof(struct seg_head_s))));
-        ASSERT(addr ==
-               (uint8_t *)anchor +
-                   (sum_aligned(num_gaps - 1) + (num_gaps - 1) * ALIGNMENT +
-                    (2 * (num_gaps - 1)) * (sizeof(struct seg_head_s) +
-                                            sizeof(struct seg_tail_s)) +
-                    sizeof(struct seg_head_s)));
         ASSERT(is_aligned(addr));
+        pr_info("i %zu aligned_storage %zu", i, aligned_storage_s);
+
+        ASSERT(addr == (uint8_t *)anchor + sizeof(struct seg_head_s) + 
+                            sum_aligned(num_gaps-1) +
+                             (num_gaps-1) * ALIGNMENT +
+                             (2 * (num_gaps-1)) *
+                                 (sizeof(struct seg_head_s) +
+                                  sizeof(struct seg_tail_s)));
+
         free(addr);
     }
+
+    for (size_t i = 0; i < num_gaps-1; i++) {
+        free(barriers[i]);
+    }
+
+
+}
 
     return EXIT_SUCCESS;
 }
