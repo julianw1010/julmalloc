@@ -9,7 +9,6 @@ int remove_not_first_segment_end() {
     uint8_t *addr2 = malloc(1);
 
     free(addr2);
-    // Test
     return EXIT_SUCCESS;
 }
 
