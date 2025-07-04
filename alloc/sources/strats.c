@@ -25,19 +25,19 @@ uint8_t *best_fit(seg_list_head_s *list, size_t size) {
     size_t total_size =
         sizeof(struct seg_head_s) + effective_size + sizeof(struct seg_tail_s);
 
-    // pr_info("Allocating size %zu", total_size);
+    // //pr_info("Allocating size %zu", total_size);
     if (!list->end_addr) {
         pr_error("Sorry, list not initialized");
         return nullptr;
     }
     if (!list->first_seg) {
-        // pr_info("List is empty, maybe there is storage left though");
+        // //pr_info("List is empty, maybe there is storage left though");
         int free_size = (uint8_t *)list->end_addr -
                         ((uint8_t *)list + sizeof(struct seg_list_head_s));
         if (free_size >= (int)total_size) {
             return (uint8_t *)list + sizeof(struct seg_list_head_s);
         }
-        // pr_info("Storage not large enough, consider expanding");
+        // //pr_info("Storage not large enough, consider expanding");
         return nullptr;
     }
     int startgapsize = (uint8_t *)list->first_seg -
@@ -46,18 +46,18 @@ uint8_t *best_fit(seg_list_head_s *list, size_t size) {
     size_t best_gap_size = 0;
 
     if (startgapsize >= (int)total_size) {
-        // pr_info("Start segment is large enough with size %d", startgapsize);
+        // //pr_info("Start segment is large enough with size %d", startgapsize);
         best_gap_size = startgapsize;
         best_gap_addr = ((uint8_t *)list + sizeof(struct seg_list_head_s));
     } else {
-        // pr_info("Start segment not large enough with size %d", startgapsize);
+        // //pr_info("Start segment not large enough with size %d", startgapsize);
     }
     seg_tail_s *iterator = list->first_seg->next_seg_tail;
 
     do {
         if (iterator->free_following >= total_size &&
             (!best_gap_addr || iterator->free_following < best_gap_size)) {
-            // pr_info("Found smaller gap of size %zu",
+            // //pr_info("Found smaller gap of size %zu",
             // iterator->free_following);
             best_gap_size = iterator->free_following;
             best_gap_addr = (uint8_t *)iterator + sizeof(struct seg_tail_s);
@@ -90,7 +90,7 @@ uint8_t *worst_fit(seg_list_head_s *list, size_t size) {
         return nullptr;
     }
     if (!list->first_seg) {
-        // pr_info("List is empty, maybe there is storage left though");
+        // //pr_info("List is empty, maybe there is storage left though");
         int free_size = (uint8_t *)list->end_addr -
                         ((uint8_t *)list + sizeof(struct seg_list_head_s));
         if (free_size >= (int)total_size) {
@@ -106,7 +106,7 @@ uint8_t *worst_fit(seg_list_head_s *list, size_t size) {
     size_t largest_gap_size = 0;
 
     if (startgapsize >= (int)total_size) {
-        // pr_info("Start segment is large enough with size %d", startgapsize);
+        // //pr_info("Start segment is large enough with size %d", startgapsize);
         largest_gap_size = startgapsize;
         largest_gap_addr = ((uint8_t *)list + sizeof(struct seg_list_head_s));
     }
@@ -118,18 +118,18 @@ uint8_t *worst_fit(seg_list_head_s *list, size_t size) {
     do {
         if (temp->free_following >= total_size &&
             (!largest_gap_addr || temp->free_following > largest_gap_size)) {
-            // pr_info("Segment is large enough with size %zu at gap num %d",
+            // //pr_info("Segment is large enough with size %zu at gap num %d",
             //        largest_gap_size, i);
             largest_gap_size = temp->free_following;
             largest_gap_addr = (uint8_t *)temp + sizeof(struct seg_tail_s);
             i++;
         } else {
-            // pr_info("Gap %zu too small or not larger", temp->free_following);
+            // //pr_info("Gap %zu too small or not larger", temp->free_following);
         }
         temp = temp->next_seg_head->next_seg_tail;
 
     } while ((uint8_t *)temp->prev_seg_head->prev_seg_tail < (uint8_t *)temp);
-    // pr_info("Reached end of list");
+    // //pr_info("Reached end of list");
     return (uint8_t *)largest_gap_addr;
 }
 
@@ -154,11 +154,11 @@ uint8_t *first_fit(seg_list_head_s *list, size_t size) {
         return nullptr;
     }
     if (!list->first_seg) {
-        // pr_info("List is empty, maybe there is storage left though");
+        // //pr_info("List is empty, maybe there is storage left though");
         int free_size =
             (uint8_t *)list->end_addr - ((uint8_t *)list + sizeof(*list));
         if (free_size >= (int)total_size) {
-            // pr_info("Found a gap of size %d at %zu", free_size,
+            // //pr_info("Found a gap of size %d at %zu", free_size,
             //            (size_t)((uint8_t *)list + sizeof(*list)));
             return (uint8_t *)list + sizeof(*list);
         }
@@ -169,21 +169,21 @@ uint8_t *first_fit(seg_list_head_s *list, size_t size) {
                        ((uint8_t *)list + sizeof(struct seg_list_head_s));
 
     if (startgapsize >= (int)total_size) {
-        // pr_info("Start segment is large enough with size %d", startgapsize);
+        // //pr_info("Start segment is large enough with size %d", startgapsize);
         return (uint8_t *)list + sizeof(struct seg_list_head_s);
     }
-    // pr_info("Start segment not large enough with size %d", startgapsize);
+    // //pr_info("Start segment not large enough with size %d", startgapsize);
     seg_tail_s *temp = list->first_seg->next_seg_tail;
 
     do {
 
         if (temp->free_following >= total_size) {
-            // pr_info("Found a gap of size %zu", temp->free_following);
+            // //pr_info("Found a gap of size %zu", temp->free_following);
             return (uint8_t *)temp + sizeof(*temp);
         }
         temp = temp->next_seg_head->next_seg_tail;
     } while ((uint8_t *)temp->prev_seg_head->prev_seg_tail < (uint8_t *)temp);
-    // pr_info("No gap found");
+    // //pr_info("No gap found");
     return nullptr;
 }
 
@@ -216,7 +216,7 @@ uint8_t *next_fit(seg_list_head_s *list, size_t size) {
 
     if (!last_addr) {
 
-        // pr_info("Last_addr is empty");
+        // //pr_info("Last_addr is empty");
 
         // Do normal first fit
         return first_fit(list, size);
@@ -228,7 +228,7 @@ uint8_t *next_fit(seg_list_head_s *list, size_t size) {
     // nonsensical) behaviour
     ASSERT((uint8_t *)last_addr < list->end_addr);
 
-    // pr_info("List not empty");
+    // //pr_info("List not empty");
 
     // Initialize an iterator variable which will be used throughout searching
     // for a gap
@@ -241,7 +241,7 @@ uint8_t *next_fit(seg_list_head_s *list, size_t size) {
 
         // Check is space after tail is large enough
         if (iter->free_following >= total_size) {
-            // pr_info("Found a gap of size %zu", iter->free_following);
+            // //pr_info("Found a gap of size %zu", iter->free_following);
 
             // Iter points to the tail, we need to return the *beginning* of the
             // free segment though
@@ -257,20 +257,20 @@ uint8_t *next_fit(seg_list_head_s *list, size_t size) {
         // to abort. Another possibility is that only one segment exists at all.
     } while ((uint8_t *)iter->prev_seg_head->prev_seg_tail < (uint8_t *)iter);
 
-    // pr_info("No gap found from where we left off. Now searching from the "
+    // //pr_info("No gap found from where we left off. Now searching from the "
     //        "beginning");
 
     // Check the size between first segment and table header addr
     int header_offset =
         (uint8_t *)list->first_seg - ((uint8_t *)list + sizeof(*list));
     if (header_offset >= (int)total_size) {
-        // pr_info("It seems like a gap at the beginning of the table
+        // //pr_info("It seems like a gap at the beginning of the table
         // has been "
         //         "found. Congratulations");
         return (uint8_t *)list + sizeof(*list);
     }
 
-    // pr_info("The gap at the beginning of the table is not large
+    // //pr_info("The gap at the beginning of the table is not large
     // enough. "
     //        "Continue searching until last_addr has been reached");
 
@@ -294,7 +294,7 @@ uint8_t *next_fit(seg_list_head_s *list, size_t size) {
         // If the size of the following gap is large enough, we found a
         // gap of suitable size!
         if (iter->free_following >= total_size) {
-            // pr_info("Found a gap");
+            // //pr_info("Found a gap");
             return (uint8_t *)iter + sizeof(*iter);
         }
 
@@ -302,7 +302,7 @@ uint8_t *next_fit(seg_list_head_s *list, size_t size) {
         iter = iter->next_seg_head->next_seg_tail;
     }
 
-    // pr_info("Did not find a gap");
+    // //pr_info("Did not find a gap");
 
     // If no gap has been found, we return nullptr
     return nullptr;
