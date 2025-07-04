@@ -12,6 +12,9 @@ size_t sum_aligned(size_t num_gaps) {
 
     for (size_t i = 1; i <= num_gaps; i++) {
         sum += (size_t)ceil((double)i / ALIGNMENT) * ALIGNMENT;
+        if (i % ALIGNMENT == 0) {
+            ASSERT((size_t) ceil((double)i / ALIGNMENT) == (size_t) ceil((double)(i - 1) / ALIGNMENT));
+        }
     }
 
     ASSERT(sum % ALIGNMENT == 0);
@@ -27,41 +30,49 @@ size_t sum_aligned(size_t num_gaps) {
 // 1
 // If first_fit works correctly, the first fitting gap should be allocated
 int inverse_grid_test() {
+
+    uint8_t *anchor = malloc(1);
+    anchor += 1*ALIGNMENT + sizeof(struct seg_tail_s);
+    ASSERT(is_aligned(anchor));
+
+    for (size_t j = PAGE_SIZE; j <= STORAGE_SIZE_TESTING ; j*=2) {
+
+    size_t aligned_storage_s = (j - j%ALIGNMENT);
+
     set_alloc_function(FIRST_FIT);
 
     size_t num_gaps = 0;
-    uint8_t *anchor = malloc(1);
-    ASSERT(is_aligned(anchor));
-    free(anchor);
-    anchor -= sizeof(struct seg_head_s);
 
     // Measure maximum number of gaps. The first gap has to be strictly larger
     // than the previous ones
     while (sum_aligned(num_gaps + 1) + num_gaps * ALIGNMENT +
                (2 * num_gaps + 1) *
                    (sizeof(struct seg_head_s) + sizeof(struct seg_tail_s)) <=
-           STORAGE_SIZE_TESTING) {
+           aligned_storage_s) {
         num_gaps++;
     }
 
-    free(malloc(STORAGE_SIZE_TESTING -
-                (sizeof(struct seg_head_s) + sizeof(struct seg_tail_s))));
+    if (num_gaps == 0) {
+        continue;
+    }
+
+    pr_info("Numgaps %zu", num_gaps);
+
+    uintptr_t barriers[num_gaps-1];
 
     // Add "barriers between gaps"
     for (size_t i = 0; i < num_gaps - 1; i++) {
-        size_t helper_size = STORAGE_SIZE_TESTING -
+        size_t helper_size = aligned_storage_s -
                              (sum_aligned(i + 1) + (i + 1) * ALIGNMENT +
                               (2 * (i + 1) + 1) * (sizeof(struct seg_head_s) +
                                                    sizeof(struct seg_tail_s)));
         uint8_t *helper = malloc(helper_size);
         uint8_t *barrier = malloc(1);
+        barriers[i] = (uintptr_t) barrier;
         ASSERT(helper == anchor + sizeof(struct seg_head_s));
-        ASSERT(barrier == (uint8_t *)anchor +
-                              (STORAGE_SIZE_TESTING -
-                               (sum_aligned(i + 1) + (i + 1) * ALIGNMENT +
-                                (2 * (i + 1)) * (sizeof(struct seg_head_s) +
-                                                 sizeof(struct seg_tail_s)))) +
-                              sizeof(struct seg_head_s));
+        pr_info("%zu", i);
+        ASSERT(barrier == (uint8_t *)anchor + sizeof(struct seg_head_s)+round_up(helper_size, ALIGNMENT)+ sizeof(struct seg_tail_s) + sizeof(struct seg_head_s));
+
         ASSERT(is_aligned(helper) && is_aligned(barrier));
         free(helper);
     }
@@ -76,10 +87,10 @@ int inverse_grid_test() {
             pr_error("Malloc failure");
         }
         ASSERT(is_aligned(addr));
-        pr_info("%zu", addr);
-        pr_info("Assertion %zu: %zu", i + 1,
-                (uint8_t *)anchor +
-                    (STORAGE_SIZE_TESTING -
+        pr_info("" FMT_UINTPTR, (uintptr_t)addr);
+        pr_info("Assertion %zu: " FMT_UINTPTR, i + 1,
+                (uintptr_t)anchor +
+                    (aligned_storage_s -
                      (sum_aligned(round_up(i + 1, ALIGNMENT)) +
                       (round_up(i + 1, ALIGNMENT) - 1) * ALIGNMENT +
                       (2 * (round_up(i + 1, ALIGNMENT) - 1) + 1) *
@@ -87,7 +98,7 @@ int inverse_grid_test() {
                            sizeof(struct seg_tail_s)))) +
                     sizeof(struct seg_head_s));
         ASSERT(addr == (uint8_t *)anchor +
-                           (STORAGE_SIZE_TESTING -
+                           (aligned_storage_s -
                             (sum_aligned(round_up(i + 1, ALIGNMENT)) +
                              (round_up(i + 1, ALIGNMENT) - 1) * ALIGNMENT +
                              (2 * (round_up(i + 1, ALIGNMENT) - 1) + 1) *
@@ -97,6 +108,13 @@ int inverse_grid_test() {
 
         free(addr);
     }
+
+    // Free "barriers between gaps"
+    for (size_t i = 0; i < num_gaps - 1; i++) {
+        free((uint8_t *)barriers[i]);
+    }
+
+}
 
     return EXIT_SUCCESS;
 }

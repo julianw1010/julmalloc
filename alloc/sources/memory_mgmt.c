@@ -964,6 +964,9 @@ uint8_t *find_free_seg(size_t size) {
         return expand_list(size);
     }
 
+
+    pr_info("Found a gap");
+
     // Return address which points to the first unallocated storage either after
     // some tail of another segment, or after the storage table header. new_addr
     // does NOT point to some kind of actually usable storage area for the user,

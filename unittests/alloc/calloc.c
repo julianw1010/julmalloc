@@ -18,25 +18,38 @@ static bool is_empty(uint8_t *addr, size_t size) {
 }
 
 int main() {
-    uint8_t *array[STORAGE_SIZE_TESTING];
-    uint8_t *anchor = malloc(1);
-    free(anchor);
 
-    for (int i = 1; i <= STORAGE_SIZE_TESTING; i++) {
-        for (int j = 0; j < STORAGE_SIZE_TESTING / i; i++) {
+    uint8_t *array[STORAGE_SIZE_TESTING];
+
+    // i denotes the storage size
+    for (int i = 1; i <= STORAGE_SIZE_TESTING; i*=2) {
+
+        // j is a helper variable to allocate STORAGE_SIZE_TESTING / i many storages
+        for (int j = 0; j < STORAGE_SIZE_TESTING / i; j++) {
+
             pr_info("Allocating elements of size i");
-            array[i] = calloc(1, i);
-            if (!is_empty(array[i], i)) {
+
+            //malloc STORAGE_SIZE_TESTING/i many storages of size i, initialized with zero
+
+            array[j] = calloc(1, i);
+
+            //Check if allocated storages are set to zero
+            if (!is_empty(array[j], i)) {
+
                 return EXIT_FAILURE;
+
             }
-            if (!is_aligned(array[i])) {
+
+            //Check if storages are aligned
+            if (!is_aligned(array[j])) {
+
                 return EXIT_FAILURE;
+
             }
         }
-
-        size_t step_size = array[0] - array[1];
-        for (int j = 0; j < STORAGE_SIZE_TESTING / i; i++) {
-            free(anchor + j * step_size);
+        
+        for (int j = 0; j < STORAGE_SIZE_TESTING / i; j++) {
+            free(array[j]);
         }
     }
 
