@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.28.2)
 project(julmalloc LANGUAGES C VERSION 1.0.0 DESCRIPTION "julmalloc")
 
-add_compile_options(-Wall -Wextra -Wno-unused-variable -std=gnu23)
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+
+add_compile_options(-Wall -Wextra -Wno-unused-but-set-variable -Wno-unused-variable)
 include(CTest)
 
 install(CODE "

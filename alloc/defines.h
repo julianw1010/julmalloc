@@ -5,12 +5,11 @@
 #ifndef ALLOC_DEFINES_H
 #define ALLOC_DEFINES_H
 
-#include "alloc/types.h"
 #include "alloc/utils.h"
+#include <inttypes.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <inttypes.h>
 
 //! The storage will only be expanded in segments of PAGE_SIZE to avoid frequent
 //! brk/sbrk calls.

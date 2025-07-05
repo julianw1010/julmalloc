@@ -1,3 +1,4 @@
+#include "alloc/types.h"
 #include "unittests/defines.h"
 #include <alloc/defines.h>
 
@@ -9,7 +10,7 @@ int main() {
     uint8_t *addr = malloc(STORAGE_SIZE_TESTING);
     uint8_t *addr2 = malloc(STORAGE_SIZE_TESTING);
     if (!is_aligned(addr) || !is_aligned(addr2)) {
-            return EXIT_FAILURE;
+        return EXIT_FAILURE;
     }
 
     if (!addr) {

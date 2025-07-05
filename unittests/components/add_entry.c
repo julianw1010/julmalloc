@@ -68,14 +68,10 @@ int alloc_in_the_middle_of_empty_table() {
 
     free(addr1);
 
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wuse-after-free"
     if (!add_entry(addr1 - sizeof(struct seg_head_s) + 1, 1)) {
         pr_error("Invalid alloc");
         return EXIT_FAILURE;
     }
-
-    #pragma GCC diagnostic pop
 
     return EXIT_SUCCESS;
 }
@@ -88,14 +84,10 @@ int alloc_in_the_middle_between_2_segments() {
 
     free(addr2);
 
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wuse-after-free"
     if (!add_entry(addr2 - sizeof(struct seg_head_s) + 1, 1)) {
         pr_error("Invalid alloc");
         return EXIT_FAILURE;
     }
-
-    #pragma GCC diagnostic pop
 
     return EXIT_SUCCESS;
 }
