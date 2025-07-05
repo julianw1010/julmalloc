@@ -1,6 +1,5 @@
 #include "alloc/defines.h"
 #include "alloc/memory_mgmt.h"
-#include "alloc/strats.h"
 
 #include "unittests/defines.h"
 #include <stdlib.h>
@@ -25,8 +24,10 @@ int two_test() {
     uint8_t *end = malloc(1);
     free(expand);
 
-    for (size_t i = 0; i < STORAGE_SIZE_TESTING/4;i++) {
-
+    for (size_t i = 1;
+         i < STORAGE_SIZE_TESTING / ((sizeof(struct seg_tail_s) + ALIGNMENT +
+                                      sizeof(struct seg_head_s)));
+         i++) {
         uint8_t *buffer = malloc(i);
         uint8_t *barrier = malloc(1);
 
@@ -34,7 +35,12 @@ int two_test() {
 
         uint8_t *test = malloc(1);
 
-        ASSERT(test == barrier + 1*ALIGNMENT + sizeof(struct seg_tail_s) + sizeof(struct seg_head_s));
+        pr_info("%zu", test);
+        pr_info("%zu", barrier + 1 * ALIGNMENT + sizeof(struct seg_tail_s) +
+                           sizeof(struct seg_head_s));
+
+        ASSERT(test == barrier + 1 * ALIGNMENT + sizeof(struct seg_tail_s) +
+                           sizeof(struct seg_head_s));
 
         free(test);
 
@@ -42,9 +48,7 @@ int two_test() {
     }
 
     return EXIT_SUCCESS;
-
 }
-
 
 int main() {
     set_alloc_function(WORST_FIT);
