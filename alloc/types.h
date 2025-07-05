@@ -5,8 +5,6 @@
 #ifndef ALLOC_TYPES_H
 #define ALLOC_TYPES_H
 
-#include "alloc/defines.h"
-#include "alloc/types.h"
 #include <stddef.h>
 #include <stdint.h>
 
