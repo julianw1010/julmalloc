@@ -1,4 +1,11 @@
-  # Introduction
+# Declaration of Authorship
+I hereby declare that all code in this repository was written solely and exclusively by me, without the assistance of any other person, group, or automated tool, unless explicitly stated otherwise in the documentation or source code comments.
+Any third-party libraries, snippets, or external resources are properly attributed according to their respective licenses.
+
+Signed,
+Julian
+
+# Introduction
 
 A malloc() implementation, written from scratch completely and solely by myself, in C.
 
