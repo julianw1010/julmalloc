@@ -1,0 +1,1 @@
+add_library(alloc_functions sources/alloc_functions.c)
